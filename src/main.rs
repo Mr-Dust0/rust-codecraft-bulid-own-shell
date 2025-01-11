@@ -14,7 +14,7 @@ fn main() {
         let trimmed_input = input.trim();
         let tokens: Vec<&str> = trimmed_input.split(' ').collect();
         match tokens[0] {
-            "exit" => std::process::exit(1);,
+            "exit" => std::process::exit(1),
             _ => println!("{}: command not found", trimmed_input),
         };
     }
