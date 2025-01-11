@@ -1,9 +1,11 @@
 use std::env;
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::os::unix::process::CommandExt;
 use std::path::Path;
+use std::process::Command;
 fn main() {
-    // Uncomment this block to pass the first stage
+    let paths = env::var("PATH").unwrap();
     loop {
         print!("$ ");
         io::stdout().flush().unwrap();
@@ -24,7 +26,6 @@ fn main() {
                         println!("{} is a shell builtin", tokens[1]);
                     }
                     _ => {
-                        let paths = env::var("PATH").unwrap();
                         let mut found = false;
                         for p in paths.split(":") {
                             let pa = Path::new(p).join(tokens[1]);
@@ -43,7 +44,16 @@ fn main() {
                     }
                 };
             }
-            _ => println!("{}: command not found", trimmed_input),
-        };
+            _ => {
+                for p in paths.split(":") {
+                    let pa = Path::new(p).join(tokens[1]);
+                    if pa.exists() {
+                        let mut command = Command::new(tokens[0]);
+                        command.arg(tokens[1..].join(" "));
+                        command.exec();
+                    }
+                }
+            }
+        }
     }
 }
