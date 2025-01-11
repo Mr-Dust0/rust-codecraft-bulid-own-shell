@@ -46,7 +46,7 @@ fn main() {
             }
             _ => {
                 for p in paths.split(":") {
-                    let pa = Path::new(p).join(tokens[1]);
+                    let pa = Path::new(p).join(tokens[0]);
                     if pa.exists() {
                         let mut command = Command::new(tokens[0]);
                         command.arg(tokens[1..].join(" "));
