@@ -19,7 +19,7 @@ fn main() {
             "type" => {
                 match tokens[1] {
                     "echo" | "type" | "exit" => {
-                        println!("{} is a bultin type", tokens[1]);
+                        println!("{} is a shell builtin", tokens[1]);
                     }
                     _ => println!("{}: not found", tokens[1]),
                 };
