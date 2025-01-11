@@ -1,5 +1,7 @@
+use std::env;
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::path::Path;
 fn main() {
     // Uncomment this block to pass the first stage
     loop {
@@ -21,7 +23,23 @@ fn main() {
                     "echo" | "type" | "exit" => {
                         println!("{} is a shell builtin", tokens[1]);
                     }
-                    _ => println!("{}: not found", tokens[1]),
+                    _ => {
+                        let paths = env::var("PATH").unwrap();
+                        let mut found = false;
+                        for p in paths.split(":") {
+                            let pa = Path::new(p).join(tokens[1]);
+                            if pa.exists() {
+                                println!(
+                                    "valid command is {}",
+                                    pa.into_os_string().into_string().unwrap()
+                                );
+                                found = true;
+                            }
+                        }
+                        if !found {
+                            println!("{}: not found", tokens[1])
+                        }
+                    }
                 };
             }
             _ => println!("{}: command not found", trimmed_input),
