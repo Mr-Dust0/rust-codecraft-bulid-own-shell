@@ -1,7 +1,5 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use std::process;
-
 fn main() {
     // Uncomment this block to pass the first stage
     loop {
@@ -17,6 +15,14 @@ fn main() {
             "exit" => std::process::exit(0),
             "echo" => {
                 println!("{}", tokens[1..].join(" "));
+            }
+            "type" => {
+                match tokens[1] {
+                    "echo" | "type" | "exit" => {
+                        println!("{} is a bultin type", tokens[1]);
+                    }
+                    _ => println!("{}: not found", tokens[1]),
+                };
             }
             _ => println!("{}: command not found", trimmed_input),
         };
