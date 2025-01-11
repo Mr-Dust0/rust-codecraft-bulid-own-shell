@@ -30,7 +30,8 @@ fn main() {
                             let pa = Path::new(p).join(tokens[1]);
                             if pa.exists() {
                                 println!(
-                                    "valid command is {}",
+                                    "{} is {}",
+                                    tokens[1],
                                     pa.into_os_string().into_string().unwrap()
                                 );
                                 found = true;
