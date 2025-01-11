@@ -28,7 +28,7 @@ fn main() {
                         let mut found = false;
                         for p in paths.split(":") {
                             let pa = Path::new(p).join(tokens[1]);
-                            if pa.exists() {
+                            if pa.exists() && !found {
                                 println!(
                                     "{} is {}",
                                     tokens[1],
