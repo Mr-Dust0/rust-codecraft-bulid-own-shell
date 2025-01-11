@@ -12,8 +12,9 @@ fn main() {
         let mut input = String::new();
         stdin.read_line(&mut input).unwrap();
         let trimmed_input = input.trim();
-        match trimmed_input {
-            "exit" => std::process::exit(3),
+        let tokens: Vec<&str> = trimmed_input.split(' ').collect();
+        match tokens[0] {
+            "exit" => std::process::exit(1);,
             _ => println!("{}: command not found", trimmed_input),
         };
     }
