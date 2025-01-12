@@ -1,10 +1,8 @@
-use core::fmt;
 use std::env;
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use std::os::unix::process::CommandExt;
 use std::path::Path;
-use std::process::{Command, Output};
+use std::process::Command;
 fn main() {
     let paths = env::var("PATH").unwrap();
     loop {
@@ -47,17 +45,24 @@ fn main() {
             }
             _ => {
                 let paths = get_path(tokens[0]);
-                if paths != "" {
-                    // need to use the & so the loop doesnt consume the tokens so it cant be used
-                    // outside of the loop
-                    let mut command = Command::new(paths);
-                    for arg in &tokens[1..] {
-                        command.arg(arg);
-                    }
-                    let output = command.output().expect("failed to execute");
-                    let stdout = String::from_utf8_lossy(&output.stdout);
-                    print!("{}", stdout)
+                let mut command = Command::new(paths);
+                for arg in &tokens[1..] {
+                    command.arg(arg);
                 }
+                let output = command.output().expect("failed to execute");
+                let stdout = String::from_utf8_lossy(&output.stdout);
+                print!("{}", stdout)
+                //if paths != "" {
+                //    // need to use the & so the loop doesnt consume the tokens so it cant be used
+                //    // outside of the loop
+                //    let mut command = Command::new(paths);
+                //    for arg in &tokens[1..] {
+                //        command.arg(arg);
+                //    }
+                //    let output = command.output().expect("failed to execute");
+                //    let stdout = String::from_utf8_lossy(&output.stdout);
+                //    print!("{}", stdout)
+                //}
             }
         }
     }
