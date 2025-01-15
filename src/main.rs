@@ -17,7 +17,7 @@ fn main() {
         let arguments = handle_quotes('\'', &tokens[1..]);
         let v2: Vec<&str> = arguments.iter().map(|s| s.as_str()).collect();
         let arguments = handle_quotes('"', &v2[..]);
-        println!("{:?}", arguments);
+        // println!("{:?}", arguments);
         match tokens[0] {
             "exit" => std::process::exit(0),
             "echo" => {
