@@ -52,8 +52,9 @@ fn main() {
             "cat" => {
                 for path in arguments.into_iter() {
                     let content = std::fs::read_to_string(path.trim());
-                    println!("{}", content.unwrap());
+                    print!("{}", content.unwrap());
                 }
+                println!()
             }
             "cd" => {
                 let home = env::var("HOME").unwrap();
