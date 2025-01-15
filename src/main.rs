@@ -18,12 +18,12 @@ fn main() {
         match tokens[0] {
             "exit" => std::process::exit(0),
             "echo" => {
-                println!("{}", arguments[..].join(""));
+                println!("{}", &arguments[..].join(""));
                 // Adding an random comment so that i can send an push to the github
             }
             "type" => {
                 match tokens[1] {
-                    "echo" | "type" | "exit" | "pwd" | "cd" => {
+                    "echo" | "type" | "exit" | "pwd" | "cd" | "cat" => {
                         println!("{} is a shell builtin", tokens[1]);
                     }
                     _ => {
@@ -48,6 +48,12 @@ fn main() {
             "pwd" => {
                 let current_dir = std::env::current_dir().expect("cant get the current dir");
                 println!("{}", current_dir.into_os_string().into_string().unwrap());
+            }
+            "cat" => {
+                for path in arguments.into_iter() {
+                    let content = std::fs::read_to_string(path.trim());
+                    println!("{}", content.unwrap());
+                }
             }
             "cd" => {
                 let home = env::var("HOME").unwrap();
