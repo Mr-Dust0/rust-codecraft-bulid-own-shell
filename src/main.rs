@@ -23,7 +23,7 @@ fn main() {
             }
             "type" => {
                 match tokens[1] {
-                    "echo" | "type" | "exit" | "pwd" | "cd" | "cat" => {
+                    "echo" | "type" | "exit" | "pwd" | "cd" => {
                         println!("{} is a shell builtin", tokens[1]);
                     }
                     _ => {
