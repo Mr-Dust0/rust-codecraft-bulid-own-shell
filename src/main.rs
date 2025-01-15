@@ -1,8 +1,8 @@
-use std::env;
 #[allow(unused_imports)]
 use std::io::{self, Write};
 use std::path::Path;
 use std::process::{Command, Output};
+use std::{env, result};
 fn main() {
     let paths = env::var("PATH").unwrap();
     loop {
@@ -46,6 +46,17 @@ fn main() {
             "pwd" => {
                 let current_dir = std::env::current_dir().expect("cant get the current dir");
                 println!("{}", current_dir.into_os_string().into_string().unwrap());
+            }
+            "cd" => {
+                let lol = match std::env::set_current_dir(tokens[1]) {
+                    Ok(result) => {
+                        continue;
+                    }
+                    Err(Error) => {
+                        println!("cd: {}: No such file or directory", tokens[1]);
+                        continue;
+                    }
+                };
             }
             _ => {
                 let paths = get_path(&tokens[0]);
