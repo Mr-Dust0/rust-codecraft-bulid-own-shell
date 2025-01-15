@@ -30,6 +30,7 @@ fn main() {
         } else {
             let tokens: Vec<&str> = trimmed_input.split_whitespace().collect();
             arguments = tokens[1..].iter().map(|s| noquotes(*s)).collect();
+            // Adding an comment to that i can push again
         }
 
         //let arguments = handle_quotes('\'', &tokens[1..]);
