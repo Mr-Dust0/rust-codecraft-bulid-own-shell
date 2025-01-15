@@ -107,6 +107,9 @@ fn get_path(binary: &str) -> String {
 fn handle_quotes(quote: char, userinput: &[&str]) -> Vec<String> {
     let mut collected_userinput = userinput.join(" ");
     let mut tokens = Vec::new();
+    if collected_userinput.contains(quote) == false {
+        return vec![collected_userinput];
+    }
     while collected_userinput.contains(quote) {
         let index_1 = collected_userinput.find(quote).unwrap();
         let index_2 = collected_userinput[index_1 + 1..].find(quote).unwrap() + index_1 + 1;
@@ -117,5 +120,6 @@ fn handle_quotes(quote: char, userinput: &[&str]) -> Vec<String> {
         //println!("Token {}", token);
         collected_userinput = String::from(&collected_userinput[index_2 + 1..]);
     }
+
     return tokens;
 }
