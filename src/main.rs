@@ -1,8 +1,8 @@
+use std::env;
 #[allow(unused_imports)]
 use std::io::{self, Write};
 use std::path::Path;
-use std::process::{Command, Output};
-use std::{env, result};
+use std::process::Command;
 fn main() {
     let paths = env::var("PATH").unwrap();
     loop {
@@ -14,10 +14,11 @@ fn main() {
         stdin.read_line(&mut input).unwrap();
         let trimmed_input = input.trim();
         let tokens: Vec<&str> = trimmed_input.split(' ').collect();
+        let arguments = handle_quotes('\'', &tokens[1..]);
         match tokens[0] {
             "exit" => std::process::exit(0),
             "echo" => {
-                println!("{}", tokens[1..].join(" "));
+                println!("{}", arguments[..].join(" "));
             }
             "type" => {
                 match tokens[1] {
@@ -102,4 +103,19 @@ fn get_path(binary: &str) -> String {
         }
     }
     return String::from("");
+}
+fn handle_quotes(quote: char, userinput: &[&str]) -> Vec<String> {
+    let mut collected_userinput = userinput.join(" ");
+    let mut tokens = Vec::new();
+    while collected_userinput.contains(quote) {
+        let index_1 = collected_userinput.find(quote).unwrap();
+        let index_2 = collected_userinput[index_1 + 1..].find(quote).unwrap() + index_1 + 1;
+        //println!("Input {}", &collected_userinput[index_1 + 1..index_2]);
+        let mut token = String::new();
+        let _ = &collected_userinput[index_1 + 1..index_2].clone_into(&mut token);
+        tokens.push(token.clone());
+        //println!("Token {}", token);
+        collected_userinput = String::from(&collected_userinput[index_2 + 1..]);
+    }
+    return tokens;
 }
