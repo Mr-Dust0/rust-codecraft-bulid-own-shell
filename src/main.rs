@@ -13,7 +13,7 @@ fn main() {
         let mut input = String::new();
         stdin.read_line(&mut input).unwrap();
         let trimmed_input = input.trim();
-        let tokens: Vec<&str> = trimmed_input.split(' ').collect();
+        let tokens: Vec<&str> = trimmed_input.split_whitespace().collect();
         let mut arguments = Vec::new();
         if trimmed_input.contains('"') && trimmed_input.contains("'") {
             let indexdq = trimmed_input.find('"');
@@ -27,6 +27,8 @@ fn main() {
             arguments = handle_quotes_last('"', &tokens[1..]);
         } else if trimmed_input.contains("'") {
             arguments = handle_quotes('\'', &tokens[1..]);
+        } else {
+            arguments = tokens[1..].iter().map(|s| noquotes(*s)).collect();
         }
 
         //let arguments = handle_quotes('\'', &tokens[1..]);
@@ -195,4 +197,10 @@ fn handle_quotes(quote: char, userinput: &[&str]) -> Vec<String> {
     }
 
     return tokens;
+}
+fn noquotes(s: &str) -> String {
+    let mut st = s.trim().to_string();
+    st.push(' ');
+    //st.insert_str(st.len() - 2, " ");
+    return st;
 }
