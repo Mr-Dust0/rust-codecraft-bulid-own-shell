@@ -21,7 +21,7 @@ fn main() {
             }
             "type" => {
                 match tokens[1] {
-                    "echo" | "type" | "exit" | "pwd" => {
+                    "echo" | "type" | "exit" | "pwd" | "cd" => {
                         println!("{} is a shell builtin", tokens[1]);
                     }
                     _ => {
@@ -48,7 +48,13 @@ fn main() {
                 println!("{}", current_dir.into_os_string().into_string().unwrap());
             }
             "cd" => {
-                match std::env::set_current_dir(tokens[1]) {
+                let home = env::var("HOME").unwrap();
+                let full_path = if tokens[1].chars().nth(0).unwrap() == '~' {
+                    tokens[1].replace("~", &home)
+                } else {
+                    tokens[1].to_string()
+                };
+                match std::env::set_current_dir(full_path) {
                     Ok(_) => {
                         continue;
                     }
