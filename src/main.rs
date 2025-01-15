@@ -14,9 +14,24 @@ fn main() {
         stdin.read_line(&mut input).unwrap();
         let trimmed_input = input.trim();
         let tokens: Vec<&str> = trimmed_input.split(' ').collect();
+        let mut arguments = Vec::new();
+        if trimmed_input.contains('"') && trimmed_input.contains("'") {
+            let indexdq = trimmed_input.find('"');
+            let indexsq = trimmed_input.find("'");
+            if indexsq > indexdq {
+                arguments = handle_quotes_last('"', &tokens[1..]);
+            } else {
+                arguments = handle_quotes('\'', &tokens[1..]);
+            }
+        } else if trimmed_input.contains('"') {
+            arguments = handle_quotes_last('"', &tokens[1..]);
+        } else if trimmed_input.contains("'") {
+            arguments = handle_quotes('\'', &tokens[1..]);
+        }
+
         //let arguments = handle_quotes('\'', &tokens[1..]);
         //let v2: Vec<&str> = arguments.iter().map(|s| s.as_str()).collect();
-        let arguments = handle_quotes_last('"', &tokens[1..]);
+        //let arguments = handle_quotes_last('"', &tokens[1..]);
         // println!("{:?}", arguments);
         match tokens[0] {
             "exit" => std::process::exit(0),
