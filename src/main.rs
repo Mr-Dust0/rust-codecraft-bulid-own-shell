@@ -21,7 +21,7 @@ fn main() {
             }
             "type" => {
                 match tokens[1] {
-                    "echo" | "type" | "exit" => {
+                    "echo" | "type" | "exit" | "pwd" => {
                         println!("{} is a shell builtin", tokens[1]);
                     }
                     _ => {
@@ -42,6 +42,10 @@ fn main() {
                         }
                     }
                 };
+            }
+            "pwd" => {
+                let current_dir = std::env::current_dir().expect("cant get the current dir");
+                println!("{}", current_dir.into_os_string().into_string().unwrap());
             }
             _ => {
                 let paths = get_path(&tokens[0]);
