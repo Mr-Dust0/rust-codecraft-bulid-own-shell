@@ -48,11 +48,11 @@ fn main() {
                 println!("{}", current_dir.into_os_string().into_string().unwrap());
             }
             "cd" => {
-                let lol = match std::env::set_current_dir(tokens[1]) {
-                    Ok(result) => {
+                match std::env::set_current_dir(tokens[1]) {
+                    Ok(_) => {
                         continue;
                     }
-                    Err(Error) => {
+                    Err(_) => {
                         println!("cd: {}: No such file or directory", tokens[1]);
                         continue;
                     }
