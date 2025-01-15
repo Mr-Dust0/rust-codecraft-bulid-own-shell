@@ -54,7 +54,7 @@ fn main() {
                     let content = std::fs::read_to_string(path.trim());
                     print!("{}", content.unwrap());
                 }
-                println!()
+                continue;
             }
             "cd" => {
                 let home = env::var("HOME").unwrap();
