@@ -19,6 +19,7 @@ fn main() {
             "exit" => std::process::exit(0),
             "echo" => {
                 println!("{}", arguments[..].join(""));
+                // Adding an random comment so that i can send an push to the github
             }
             "type" => {
                 match tokens[1] {
