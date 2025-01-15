@@ -14,9 +14,9 @@ fn main() {
         stdin.read_line(&mut input).unwrap();
         let trimmed_input = input.trim();
         let tokens: Vec<&str> = trimmed_input.split(' ').collect();
-        let arguments = handle_quotes('\'', &tokens[1..]);
-        let v2: Vec<&str> = arguments.iter().map(|s| s.as_str()).collect();
-        let arguments = handle_quotes_last('"', &v2[..]);
+        //let arguments = handle_quotes('\'', &tokens[1..]);
+        //let v2: Vec<&str> = arguments.iter().map(|s| s.as_str()).collect();
+        let arguments = handle_quotes_last('"', &tokens[1..]);
         // println!("{:?}", arguments);
         match tokens[0] {
             "exit" => std::process::exit(0),
@@ -160,6 +160,13 @@ fn handle_quotes(quote: char, userinput: &[&str]) -> Vec<String> {
     }
     while collected_userinput.contains(quote) {
         let index_1 = collected_userinput.find(quote).unwrap();
+        if collected_userinput.contains('"') {
+            let indexdq_1 = collected_userinput.find(quote).unwrap();
+            if indexdq_1 < index_1 {
+                let tokens: Vec<&str> = collected_userinput.split(" ").collect();
+                return vec![tokens.join(" ")];
+            }
+        }
         let index_2 = collected_userinput[index_1 + 1..].find(quote).unwrap() + index_1 + 1;
         //println!("Input {}", &collected_userinput[index_1 + 1..index_2]);
         let mut token = String::new();
