@@ -18,7 +18,7 @@ fn main() {
         match tokens[0] {
             "exit" => std::process::exit(0),
             "echo" => {
-                println!("{}", arguments[..].join(" "));
+                println!("{}", arguments[..].join(""));
             }
             "type" => {
                 match tokens[1] {
@@ -123,6 +123,9 @@ fn handle_quotes(quote: char, userinput: &[&str]) -> Vec<String> {
         //println!("Input {}", &collected_userinput[index_1 + 1..index_2]);
         let mut token = String::new();
         let _ = &collected_userinput[index_1 + 1..index_2].clone_into(&mut token);
+        if collected_userinput.chars().nth(0).unwrap() == ' ' {
+            token.insert_str(0, " ");
+        }
         tokens.push(token.clone());
         //println!("Token {}", token);
         collected_userinput = String::from(&collected_userinput[index_2 + 1..]);
