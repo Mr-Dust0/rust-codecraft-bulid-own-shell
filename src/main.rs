@@ -49,7 +49,7 @@ fn main() {
                     println!("Not an actual command");
                     continue;
                 }
-                let output = Command::new(paths)
+                let output = Command::new(tokens[0])
                     .args(&tokens[1..])
                     .output()
                     .expect("Cant execute the command")
