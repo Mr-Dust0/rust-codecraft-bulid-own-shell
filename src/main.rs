@@ -15,6 +15,9 @@ fn main() {
         let trimmed_input = input.trim();
         let tokens: Vec<&str> = trimmed_input.split(' ').collect();
         let arguments = handle_quotes('\'', &tokens[1..]);
+        let v2: Vec<&str> = arguments.iter().map(|s| s.as_str()).collect();
+        let arguments = handle_quotes('"', &v2[..]);
+        println!("{:?}", arguments);
         match tokens[0] {
             "exit" => std::process::exit(0),
             "echo" => {
@@ -112,6 +115,7 @@ fn get_path(binary: &str) -> String {
     }
     return String::from("");
 }
+
 fn handle_quotes(quote: char, userinput: &[&str]) -> Vec<String> {
     let mut collected_userinput = userinput.join(" ");
     let mut tokens = Vec::new();
