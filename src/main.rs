@@ -108,7 +108,11 @@ fn handle_quotes(quote: char, userinput: &[&str]) -> Vec<String> {
     let mut collected_userinput = userinput.join(" ");
     let mut tokens = Vec::new();
     if collected_userinput.contains(quote) == false {
-        return vec![collected_userinput];
+        return collected_userinput
+            .split(' ')
+            .into_iter()
+            .map(|s| String::from(s))
+            .collect();
     }
     while collected_userinput.contains(quote) {
         let index_1 = collected_userinput.find(quote).unwrap();
