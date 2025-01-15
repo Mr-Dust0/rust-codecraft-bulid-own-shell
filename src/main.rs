@@ -46,7 +46,7 @@ fn main() {
             _ => {
                 let paths = get_path(&tokens[0]);
                 if paths == "" {
-                    println!("Not an actual command");
+                    println!("{}: command not found", tokens[0]);
                     continue;
                 }
                 let output = Command::new(tokens[0])
