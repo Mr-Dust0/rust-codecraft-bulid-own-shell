@@ -62,6 +62,7 @@ fn main() {
                                 found = true;
                             }
                         }
+
                         if !found {
                             println!("{}: not found", tokens[1])
                         }
@@ -200,7 +201,7 @@ fn handle_quotes(quote: char, userinput: &[&str]) -> Vec<String> {
     }
 
     return tokens;
- }
+}
 // fn noquotes(s: &str) -> String {
 //     let mut st = s.trim().to_string();
 //     while st.contains("\\") {
