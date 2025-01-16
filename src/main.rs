@@ -87,7 +87,7 @@ fn main() {
             "cd" => {
                 let home = env::var("HOME").unwrap();
                 let full_path = if token[1].chars().nth(0).unwrap() == '~' {
-                    arguments[1].replace("~", &home)
+                    token[1].replace("~", &home)
                 } else {
                     token[1].to_string()
                 };
