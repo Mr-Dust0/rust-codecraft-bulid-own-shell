@@ -11,28 +11,30 @@ fn main() {
         io::stdout().flush().unwrap();
         // Wait for user input
         let stdin = io::stdin();
-        let mut input = String::new();
-        stdin.read_line(&mut input).unwrap();
-        let trimmed_input = input.trim();
-        let tokens: Vec<&str> = trimmed_input.split(" ").collect();
+        let mut trimmed_input = String::new();
+        stdin.read_line(&mut trimmed_input).unwrap();
+        let input = trimmed_input.clone();
+        let tokens: Vec<&str> = input.split(" ").collect();
+        let escaped_chars = quotes::handle_backslash(&mut trimmed_input);
         let mut arguments = Vec::new();
         if trimmed_input.contains('"') && trimmed_input.contains("'") {
             let indexdq = trimmed_input.find('"');
             let indexsq = trimmed_input.find("'");
             if indexsq > indexdq {
-                arguments = handle_quotes_last('"', &tokens[1..]);
+                arguments = quotes::handle_quotes_last('"', &tokens[1..]);
             } else {
-                arguments = handle_quotes('\'', &tokens[1..]);
+                arguments = quotes::handle_quotes('\'', &tokens[1..]);
             }
         } else if trimmed_input.contains('"') {
-            arguments = handle_quotes_last('"', &tokens[1..]);
+            arguments = quotes::handle_quotes_last('"', &tokens[1..]);
         } else if trimmed_input.contains("'") {
-            arguments = handle_quotes('\'', &tokens[1..]);
+            arguments = quotes::handle_quotes('\'', &tokens[1..]);
         } else {
             let tokens: Vec<&str> = trimmed_input.split_whitespace().collect();
             arguments = tokens[1..].iter().map(|s| quotes::noquotes(*s)).collect();
             // Adding an comment to that i can push again
         }
+        quotes::replace_escaped_chars(&mut arguments, escaped_chars);
 
         //let arguments = handle_quotes('\'', &tokens[1..]);
         //let v2: Vec<&str> = arguments.iter().map(|s| s.as_str()).collect();
@@ -42,6 +44,7 @@ fn main() {
             "exit" => std::process::exit(0),
             "echo" => {
                 println!("{}", &arguments[..].join(""));
+                continue;
                 // Adding an random comment so that i can send an push to the github
             }
             "type" => {
@@ -136,79 +139,3 @@ fn get_path(binary: &str) -> String {
     }
     return String::from("");
 }
-
-fn handle_quotes_last(quote: char, userinput: &[&str]) -> Vec<String> {
-    let mut collected_userinput = userinput.join(" ");
-    let mut tokens = Vec::new();
-    if collected_userinput.contains(quote) == false {
-        //return collected_userinput
-        //    .split(' ')
-        //    .into_iter()
-        //    .map(|s| String::from(s))
-        //    .collect();
-
-        let tokens: Vec<&str> = collected_userinput.split_whitespace().collect();
-        return vec![tokens.join(" ")];
-    }
-    while collected_userinput.contains(quote) {
-        let index_1 = collected_userinput.find(quote).unwrap();
-        let index_2 = collected_userinput[index_1 + 1..].find(quote).unwrap() + index_1 + 1;
-        //println!("Input {}", &collected_userinput[index_1 + 1..index_2]);
-        let mut token = String::new();
-        let _ = &collected_userinput[index_1 + 1..index_2].clone_into(&mut token);
-        if collected_userinput.chars().nth(0).unwrap() == ' ' {
-            token.insert_str(0, " ");
-        }
-        tokens.push(token.clone());
-        //println!("Token {}", token);
-        collected_userinput = String::from(&collected_userinput[index_2 + 1..]);
-    }
-
-    return tokens;
-}
-fn handle_quotes(quote: char, userinput: &[&str]) -> Vec<String> {
-    let mut collected_userinput = userinput.join(" ");
-    let mut tokens = Vec::new();
-    if collected_userinput.contains(quote) == false {
-        //return collected_userinput
-        //    .split(' ')
-        //    .into_iter()
-        //    .map(|s| String::from(s))
-        //    .collect();
-
-        let tokens: Vec<&str> = collected_userinput.split(" ").collect();
-        return vec![tokens.join(" ")];
-    }
-    while collected_userinput.contains(quote) {
-        let index_1 = collected_userinput.find(quote).unwrap();
-        if collected_userinput.contains('"') {
-            let indexdq_1 = collected_userinput.find(quote).unwrap();
-            if indexdq_1 < index_1 {
-                let tokens: Vec<&str> = collected_userinput.split(" ").collect();
-                return vec![tokens.join(" ")];
-            }
-        }
-        let index_2 = collected_userinput[index_1 + 1..].find(quote).unwrap() + index_1 + 1;
-        //println!("Input {}", &collected_userinput[index_1 + 1..index_2]);
-        let mut token = String::new();
-        let _ = &collected_userinput[index_1 + 1..index_2].clone_into(&mut token);
-        if collected_userinput.chars().nth(0).unwrap() == ' ' {
-            token.insert_str(0, " ");
-        }
-        tokens.push(token.clone());
-        //println!("Token {}", token);
-        collected_userinput = String::from(&collected_userinput[index_2 + 1..]);
-    }
-
-    return tokens;
-}
-// fn noquotes(s: &str) -> String {
-//     let mut st = s.trim().to_string();
-//     while st.contains("\\") {
-//         let index_1 = st.find("\\").unwrap();
-//         st = st[..index_1].to_string() + &st[index_1 + 1..];
-//     }
-//     st.push(' ');
-//     //st.insert_str(st.len() - 2, " ");
-//     return st;
-// }
