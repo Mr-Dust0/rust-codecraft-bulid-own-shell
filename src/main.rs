@@ -49,6 +49,7 @@ fn main() {
             }
         } else if test.contains("'") {
             arguments = quotes::handle_quotes('\'', &tokens[1..]);
+            // Adding an comment so that i can push
         } else {
             if token[0] == "echo" {
                 escaped_chars = quotes::handle_backslash(&mut input2);
