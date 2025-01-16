@@ -20,9 +20,29 @@ fn main() {
         let token: Vec<&str> = input.trim().split(" ").collect();
         let tokens: Vec<&str> = trimmed_input.split(" ").collect();
         let mut arguments = Vec::new();
-        if token[0] == "echo" {
-            escaped_chars = quotes::handle_backslash(&mut test);
+
+        let mut args = tokens[1..].to_vec();
+        escaped_chars = quotes::handle_backslash(&mut test);
+        if tokens[0].chars().nth(0).unwrap() == '\'' {
+            arguments = quotes::handle_quotes('\'', &tokens[..]);
+            let paths = get_path(&arguments[0]);
+            if paths == "" {
+                println!("{}: command not found", arguments[0]);
+                continue;
+            }
+            let output = Command::new(&arguments[0])
+                .args(&arguments[1..])
+                .output()
+                .expect("Cant execute the command")
+                .stdout;
+            let stdout = String::from_utf8_lossy(&output);
+            print!("{}", stdout)
+            //if paths != "" {
+            //    // need to use the & so the loop doesnt consume the tokens so it cant be used
+            //    // outside of the loop
         }
+
+        println!("{}", test);
         if test.contains('"') && test.contains("'") {
             let indexdq = trimmed_input.find('"');
             let indexsq = trimmed_input.find("'");
@@ -65,7 +85,7 @@ fn main() {
         //let arguments = handle_quotes('\'', &tokens[1..]);
         //let v2: Vec<&str> = arguments.iter().map(|s| s.as_str()).collect();
         //let arguments = handle_quotes_last('"', &tokens[1..]);
-        // println!("{:?}", arguments);
+        println!("{:?}", arguments);
         match token[0] {
             "exit" => std::process::exit(0),
             "echo" => {
