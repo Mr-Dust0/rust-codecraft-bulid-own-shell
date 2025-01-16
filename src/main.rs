@@ -42,11 +42,15 @@ fn main() {
                 //let pa = Path::new(&paths);
                 //println!("{}", pa.display());
                 //
-                let output = Command::new(paths)
-                    //  .args(arguments[1..])
-                    .arg(&arguments[1].trim()) // Execute the command with space handling
-                    .output()
-                    .expect("Failed to execute command");
+                let mut command = Command::new(paths);
+                for arg in arguments {
+                    command.arg(arg);
+                }
+                let output = command.output().expect("Failed to execute command");
+
+                //.arg(&arguments[1].trim()) // Execute the command with space handling
+                //.output()
+                //.expect("Failed to execute command");
                 print!("{}", String::from_utf8(output.stdout).unwrap());
 
                 continue;
