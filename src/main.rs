@@ -2,6 +2,7 @@ use std::env;
 mod quotes;
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::os::unix::process::CommandExt;
 use std::path::Path;
 use std::process::Command;
 fn main() {
@@ -24,19 +25,26 @@ fn main() {
         let mut args = tokens[1..].to_vec();
         escaped_chars = quotes::handle_backslash(&mut test);
         if tokens[0].chars().nth(0).unwrap() == '\'' {
-            arguments = quotes::handle_quotes('\'', &tokens[..]);
+            arguments = quotes::handle_quotes_last('\'', &tokens[..]);
             let paths = get_path(&arguments[0]);
+            println!("{}", paths);
             if paths == "" {
                 println!("{}: command not found", arguments[0]);
-                continue;
             }
-            let output = Command::new(&arguments[0])
-                .args(&arguments[1..])
+            //println!("{:?}", arguments);
+            //println!("{:?}", paths);
+            //let pa = Path::new(&paths);
+            //println!("{}", pa.display());
+            //
+            let output = Command::new(paths)
+                //  .args(arguments[1..])
+                .arg(&arguments[1].trim()) // Execute the command with space handling
                 .output()
-                .expect("Cant execute the command")
-                .stdout;
-            let stdout = String::from_utf8_lossy(&output);
-            print!("{}", stdout)
+                .expect("Failed to execute command");
+
+            // Print the output of the command
+            print!("Output: {:?}", &output);
+            continue;
             //if paths != "" {
             //    // need to use the & so the loop doesnt consume the tokens so it cant be used
             //    // outside of the loop
