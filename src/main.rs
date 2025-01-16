@@ -44,7 +44,7 @@ fn main() {
                 //
                 let mut command = Command::new(paths);
                 for arg in arguments {
-                    command.arg(arg);
+                    command.arg(arg.trim());
                 }
                 let output = command.output().expect("Failed to execute command");
 
