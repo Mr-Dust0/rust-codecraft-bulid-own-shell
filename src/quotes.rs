@@ -39,6 +39,7 @@ pub fn noquotes(s: &str) -> String {
     return st;
 }
 pub fn handle_quotes_last(quote: char, userinput: &[&str]) -> Vec<String> {
+    //["", "echo", "\"script£insidequotes\"world£\n"]
     let mut collected_userinput = userinput.join(" ");
     let mut tokens = Vec::new();
     if collected_userinput.contains(quote) == false {
@@ -64,6 +65,13 @@ pub fn handle_quotes_last(quote: char, userinput: &[&str]) -> Vec<String> {
         //println!("Token {}", token);
         collected_userinput = String::from(&collected_userinput[index_2 + 1..]);
     }
+    if collected_userinput != "" {
+        collected_userinput.pop();
+        tokens.push(collected_userinput);
+    }
+
+    //println!("{}", collected_userinput);
+    //println!("{}", noquotes(collected_userinput.as_str()));
 
     return tokens;
 }
