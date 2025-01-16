@@ -1,13 +1,8 @@
-use std::mem::needs_drop;
-
 pub fn handle_backslash(userinput: &mut String) -> Vec<char> {
     let mut escaped_characters = Vec::new();
     while userinput.contains("\\") {
         let index_1 = userinput.find('\\').unwrap();
         if let Some(ch) = userinput[index_1 + 1..index_1 + 2].chars().next() {
-            if ch == '\\' {
-                userinput.replace_range(index_1 + 1..index_1 + 2, "");
-            }
             escaped_characters.push(ch);
         }
         //escaped_characters.push(
@@ -25,9 +20,10 @@ pub fn handle_backslash(userinput: &mut String) -> Vec<char> {
 }
 pub fn replace_escaped_chars(userinput: &mut Vec<String>, escaped_chars: Vec<char>) {
     let mut indec: usize = 0;
-    for (index, input) in userinput.into_iter().enumerate() {
+    for (_, input) in userinput.into_iter().enumerate() {
         while input.contains("£") {
             *input = input.replacen("£", escaped_chars[indec].to_string().as_str(), 1);
+            //*input = input.replacen("£", escaped_chars[indec].replace("\\", ""), 1);
             indec += 1;
         }
     }

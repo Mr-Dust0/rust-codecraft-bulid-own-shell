@@ -14,9 +14,9 @@ fn main() {
         let mut trimmed_input = String::new();
         stdin.read_line(&mut trimmed_input).unwrap();
         let input = trimmed_input.clone();
-        let tokens: Vec<&str> = input.split(" ").collect();
         let token: Vec<&str> = input.trim().split(" ").collect();
         let escaped_chars = quotes::handle_backslash(&mut trimmed_input);
+        let tokens: Vec<&str> = trimmed_input.split(" ").collect();
         let mut arguments = Vec::new();
         if trimmed_input.contains('"') && trimmed_input.contains("'") {
             let indexdq = trimmed_input.find('"');
