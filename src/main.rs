@@ -7,6 +7,7 @@ use std::process::Command;
 fn main() {
     let paths = env::var("PATH").unwrap();
     loop {
+        let mut escaped_chars = Vec::new();
         print!("$ ");
         io::stdout().flush().unwrap();
         // Wait for user input
@@ -15,7 +16,9 @@ fn main() {
         stdin.read_line(&mut trimmed_input).unwrap();
         let input = trimmed_input.clone();
         let token: Vec<&str> = input.trim().split(" ").collect();
-        let escaped_chars = quotes::handle_backslash(&mut trimmed_input);
+        if token[0] == "echo" {
+            escaped_chars = quotes::handle_backslash(&mut trimmed_input);
+        }
         let tokens: Vec<&str> = trimmed_input.split(" ").collect();
         let mut arguments = Vec::new();
         if trimmed_input.contains('"') && trimmed_input.contains("'") {
@@ -35,7 +38,9 @@ fn main() {
             arguments = tokens[1..].iter().map(|s| quotes::noquotes(*s)).collect();
             // Adding an comment to that i can push again
         }
-        quotes::replace_escaped_chars(&mut arguments, escaped_chars);
+        if token[0] == "echo" {
+            quotes::replace_escaped_chars(&mut arguments, escaped_chars);
+        }
 
         //let arguments = handle_quotes('\'', &tokens[1..]);
         //let v2: Vec<&str> = arguments.iter().map(|s| s.as_str()).collect();
@@ -80,6 +85,7 @@ fn main() {
             }
             "cat" => {
                 for path in arguments.into_iter() {
+                    //println!("{}", path);
                     let content = std::fs::read_to_string(path.trim());
                     print!("{}", content.unwrap());
                 }
