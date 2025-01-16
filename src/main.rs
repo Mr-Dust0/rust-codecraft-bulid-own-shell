@@ -60,7 +60,7 @@ fn main() {
                             if pa.exists() && !found {
                                 println!(
                                     "{} is {}",
-                                    tokens[1],
+                                    tokens[1].trim(),
                                     pa.into_os_string().into_string().unwrap()
                                 );
                                 found = true;
@@ -68,7 +68,7 @@ fn main() {
                         }
 
                         if !found {
-                            println!("{}: not found", token[1])
+                            println!("{}: not found", token[1].trim())
                         }
                     }
                 };
