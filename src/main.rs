@@ -26,8 +26,12 @@ fn main() {
         escaped_chars = quotes::handle_backslash(&mut test);
 
         match tokens[0].chars().nth(0) {
-            Some(first_char) if first_char == '\'' => {
-                arguments = quotes::handle_quotes_last('\'', &tokens[..]);
+            Some(first_char) if first_char == '\'' || first_char == '"' => {
+                if first_char == '\'' {
+                    arguments = quotes::handle_quotes_last('\'', &tokens[..]);
+                } else {
+                    arguments = quotes::handle_quotes_last('"', &tokens[..]);
+                }
                 let paths = get_path(&arguments[0]);
                 if paths == "" {
                     println!("{}: command not found", arguments[0]);
