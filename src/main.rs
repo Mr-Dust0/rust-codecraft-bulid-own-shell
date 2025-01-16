@@ -16,10 +16,14 @@ fn main() {
         stdin.read_line(&mut trimmed_input).unwrap();
         let input = trimmed_input.clone();
         let mut input2 = trimmed_input.clone();
+        let mut test = trimmed_input.clone();
         let token: Vec<&str> = input.trim().split(" ").collect();
         let tokens: Vec<&str> = trimmed_input.split(" ").collect();
         let mut arguments = Vec::new();
-        if trimmed_input.contains('"') && trimmed_input.contains("'") {
+        if token[0] == "echo" {
+            escaped_chars = quotes::handle_backslash(&mut test);
+        }
+        if test.contains('"') && test.contains("'") {
             let indexdq = trimmed_input.find('"');
             let indexsq = trimmed_input.find("'");
             if indexsq > indexdq {
@@ -34,7 +38,7 @@ fn main() {
             } else {
                 arguments = quotes::handle_quotes('\'', &tokens[1..]);
             }
-        } else if trimmed_input.contains('"') {
+        } else if test.contains('"') {
             if token[0] == "echo" {
                 escaped_chars = quotes::handle_backslash(&mut input2);
             }
@@ -43,7 +47,7 @@ fn main() {
             if token[0] == "echo" {
                 quotes::replace_escaped_chars(&mut arguments, escaped_chars);
             }
-        } else if trimmed_input.contains("'") {
+        } else if test.contains("'") {
             arguments = quotes::handle_quotes('\'', &tokens[1..]);
         } else {
             if token[0] == "echo" {
