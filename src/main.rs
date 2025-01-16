@@ -26,6 +26,8 @@ fn main() {
                 if token[0] == "echo" {
                     escaped_chars = quotes::handle_backslash(&mut input2);
                 }
+
+                let tokens: Vec<&str> = input2.split(" ").collect();
                 arguments = quotes::handle_quotes_last('"', &tokens[1..]);
                 if token[0] == "echo" {
                     quotes::replace_escaped_chars(&mut arguments, escaped_chars);
@@ -37,6 +39,7 @@ fn main() {
             if token[0] == "echo" {
                 escaped_chars = quotes::handle_backslash(&mut input2);
             }
+            let tokens: Vec<&str> = input2.split(" ").collect();
             arguments = quotes::handle_quotes_last('"', &tokens[1..]);
             if token[0] == "echo" {
                 quotes::replace_escaped_chars(&mut arguments, escaped_chars);
