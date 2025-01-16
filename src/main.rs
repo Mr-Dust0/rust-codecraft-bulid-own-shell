@@ -51,7 +51,7 @@ fn main() {
             "type" => {
                 match token[1] {
                     "echo" | "type" | "exit" | "pwd" | "cd" => {
-                        println!("{} is a shell builtin", token[1]);
+                        println!("{} is a shell builtin", token[1].trim());
                     }
                     _ => {
                         let mut found = false;
