@@ -78,7 +78,8 @@ pub fn handle_quotes_last(quote: char, userinput: &[&str]) -> Vec<String> {
 pub fn handle_quotes(quote: char, userinput: &[&str]) -> Vec<String> {
     let mut collected_userinput = userinput.join(" ");
     let mut tokens = Vec::new();
-    println!("Input {}", &collected_userinput);
+    //
+    // println!("Input {}", &collected_userinput);
     if collected_userinput.contains(quote) == false {
         //return collected_userinput
         //    .split(' ')
@@ -98,7 +99,7 @@ pub fn handle_quotes(quote: char, userinput: &[&str]) -> Vec<String> {
                 return vec![tokens.join(" ")];
             }
         }
-        println!("Input {}", &collected_userinput);
+        //  println!("Input {}", &collected_userinput);
         let index_2 = collected_userinput[index_1 + 1..].find(quote).unwrap() + index_1 + 1;
         //println!("Input {}", &collected_userinput[index_1 + 1..index_2]);
         let mut token = String::new();
