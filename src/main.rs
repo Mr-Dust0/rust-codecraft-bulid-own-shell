@@ -95,9 +95,10 @@ fn main() {
             }
             "cat" => {
                 for path in arguments.into_iter() {
-                    //println!("{}", path);
-                    let content = std::fs::read_to_string(path.trim());
-                    print!("{}", content.unwrap());
+                    if path.trim() != "" {
+                        let content = std::fs::read_to_string(path.trim());
+                        print!("{}", content.unwrap());
+                    }
                 }
                 continue;
             }
