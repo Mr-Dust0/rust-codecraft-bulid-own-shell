@@ -1,4 +1,5 @@
 use std::env;
+mod quotes;
 #[allow(unused_imports)]
 use std::io::{self, Write};
 use std::path::Path;
@@ -29,7 +30,7 @@ fn main() {
             arguments = handle_quotes('\'', &tokens[1..]);
         } else {
             let tokens: Vec<&str> = trimmed_input.split_whitespace().collect();
-            arguments = tokens[1..].iter().map(|s| noquotes(*s)).collect();
+            arguments = tokens[1..].iter().map(|s| quotes::noquotes(*s)).collect();
             // Adding an comment to that i can push again
         }
 
@@ -199,14 +200,14 @@ fn handle_quotes(quote: char, userinput: &[&str]) -> Vec<String> {
     }
 
     return tokens;
-}
-fn noquotes(s: &str) -> String {
-    let mut st = s.trim().to_string();
-    while st.contains("\\") {
-        let index_1 = st.find("\\").unwrap();
-        st = st[..index_1].to_string() + &st[index_1 + 1..];
-    }
-    st.push(' ');
-    //st.insert_str(st.len() - 2, " ");
-    return st;
-}
+ }
+// fn noquotes(s: &str) -> String {
+//     let mut st = s.trim().to_string();
+//     while st.contains("\\") {
+//         let index_1 = st.find("\\").unwrap();
+//         st = st[..index_1].to_string() + &st[index_1 + 1..];
+//     }
+//     st.push(' ');
+//     //st.insert_str(st.len() - 2, " ");
+//     return st;
+// }
