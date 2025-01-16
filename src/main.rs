@@ -15,19 +15,16 @@ fn main() {
         let mut trimmed_input = String::new();
         stdin.read_line(&mut trimmed_input).unwrap();
         let input = trimmed_input.clone();
-        let mut input2 = trimmed_input.clone();
         let token: Vec<&str> = input.trim().split(" ").collect();
+        if token[0] == "echo" {
+            escaped_chars = quotes::handle_backslash(&mut trimmed_input);
+        }
         let tokens: Vec<&str> = trimmed_input.split(" ").collect();
         let mut arguments = Vec::new();
         if trimmed_input.contains('"') && trimmed_input.contains("'") {
             let indexdq = trimmed_input.find('"');
             let indexsq = trimmed_input.find("'");
             if indexsq > indexdq {
-                if token[0] == "echo" {
-                    escaped_chars = quotes::handle_backslash(&mut input2);
-                }
-
-                let tokens: Vec<&str> = input2.split(" ").collect();
                 arguments = quotes::handle_quotes_last('"', &tokens[1..]);
                 if token[0] == "echo" {
                     quotes::replace_escaped_chars(&mut arguments, escaped_chars);
@@ -36,10 +33,6 @@ fn main() {
                 arguments = quotes::handle_quotes('\'', &tokens[1..]);
             }
         } else if trimmed_input.contains('"') {
-            if token[0] == "echo" {
-                escaped_chars = quotes::handle_backslash(&mut input2);
-            }
-            let tokens: Vec<&str> = input2.split(" ").collect();
             arguments = quotes::handle_quotes_last('"', &tokens[1..]);
             if token[0] == "echo" {
                 quotes::replace_escaped_chars(&mut arguments, escaped_chars);
@@ -49,6 +42,9 @@ fn main() {
         } else {
             let tokens: Vec<&str> = trimmed_input.split_whitespace().collect();
             arguments = tokens[1..].iter().map(|s| quotes::noquotes(*s)).collect();
+            if token[0] == "echo" {
+                quotes::replace_escaped_chars(&mut arguments, escaped_chars);
+            }
             // Adding an comment to that i can push again
         }
 
