@@ -24,33 +24,33 @@ fn main() {
 
         let mut args = tokens[1..].to_vec();
         escaped_chars = quotes::handle_backslash(&mut test);
-        if tokens[0].chars().nth(0).unwrap() == '\'' {
-            arguments = quotes::handle_quotes_last('\'', &tokens[..]);
-            let paths = get_path(&arguments[0]);
-            println!("{}", paths);
-            if paths == "" {
-                println!("{}: command not found", arguments[0]);
-            }
-            //println!("{:?}", arguments);
-            //println!("{:?}", paths);
-            //let pa = Path::new(&paths);
-            //println!("{}", pa.display());
-            //
-            let output = Command::new(paths)
-                //  .args(arguments[1..])
-                .arg(&arguments[1].trim()) // Execute the command with space handling
-                .output()
-                .expect("Failed to execute command");
 
-            // Print the output of the command
-            print!("Output: {:?}", &output);
-            continue;
-            //if paths != "" {
-            //    // need to use the & so the loop doesnt consume the tokens so it cant be used
-            //    // outside of the loop
+        match tokens[0].chars().nth(0) {
+            Some(first_char) if first_char == '\'' => {
+                arguments = quotes::handle_quotes_last('\'', &tokens[..]);
+                let paths = get_path(&arguments[0]);
+                if paths == "" {
+                    println!("{}: command not found", arguments[0]);
+                    continue;
+                }
+                //println!("{:?}", arguments);
+                //println!("{:?}", paths);
+                //let pa = Path::new(&paths);
+                //println!("{}", pa.display());
+                //
+                let output = Command::new(paths)
+                    //  .args(arguments[1..])
+                    .arg(&arguments[1].trim()) // Execute the command with space handling
+                    .output()
+                    .expect("Failed to execute command");
+                print!("{}", String::from_utf8(output.stdout).unwrap());
+
+                continue;
+            }
+            _ => {}
         }
 
-        println!("{}", test);
+        //println!("{a}", test);
         if test.contains('"') && test.contains("'") {
             let indexdq = trimmed_input.find('"');
             let indexsq = trimmed_input.find("'");
@@ -93,7 +93,7 @@ fn main() {
         //let arguments = handle_quotes('\'', &tokens[1..]);
         //let v2: Vec<&str> = arguments.iter().map(|s| s.as_str()).collect();
         //let arguments = handle_quotes_last('"', &tokens[1..]);
-        println!("{:?}", arguments);
+        //        println!("{:?}", arguments);
         match token[0] {
             "exit" => std::process::exit(0),
             "echo" => {
