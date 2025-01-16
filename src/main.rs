@@ -15,6 +15,7 @@ fn main() {
         stdin.read_line(&mut trimmed_input).unwrap();
         let input = trimmed_input.clone();
         let tokens: Vec<&str> = input.split(" ").collect();
+        let token: Vec<&str> = input.trim().split(" ").collect();
         let escaped_chars = quotes::handle_backslash(&mut trimmed_input);
         let mut arguments = Vec::new();
         if trimmed_input.contains('"') && trimmed_input.contains("'") {
@@ -40,7 +41,7 @@ fn main() {
         //let v2: Vec<&str> = arguments.iter().map(|s| s.as_str()).collect();
         //let arguments = handle_quotes_last('"', &tokens[1..]);
         // println!("{:?}", arguments);
-        match tokens[0] {
+        match token[0] {
             "exit" => std::process::exit(0),
             "echo" => {
                 println!("{}", &arguments[..].join(""));
@@ -48,14 +49,14 @@ fn main() {
                 // Adding an random comment so that i can send an push to the github
             }
             "type" => {
-                match tokens[1] {
+                match token[1] {
                     "echo" | "type" | "exit" | "pwd" | "cd" => {
-                        println!("{} is a shell builtin", tokens[1]);
+                        println!("{} is a shell builtin", token[1]);
                     }
                     _ => {
                         let mut found = false;
                         for p in paths.split(":") {
-                            let pa = Path::new(p).join(tokens[1]);
+                            let pa = Path::new(p).join(token[1]);
                             if pa.exists() && !found {
                                 println!(
                                     "{} is {}",
@@ -67,7 +68,7 @@ fn main() {
                         }
 
                         if !found {
-                            println!("{}: not found", tokens[1])
+                            println!("{}: not found", token[1])
                         }
                     }
                 };
@@ -85,29 +86,29 @@ fn main() {
             }
             "cd" => {
                 let home = env::var("HOME").unwrap();
-                let full_path = if tokens[1].chars().nth(0).unwrap() == '~' {
-                    tokens[1].replace("~", &home)
+                let full_path = if token[1].chars().nth(0).unwrap() == '~' {
+                    arguments[1].replace("~", &home)
                 } else {
-                    tokens[1].to_string()
+                    token[1].to_string()
                 };
                 match std::env::set_current_dir(full_path) {
                     Ok(_) => {
                         continue;
                     }
                     Err(_) => {
-                        println!("cd: {}: No such file or directory", tokens[1]);
+                        println!("cd: {}: No such file or directory", token[1]);
                         continue;
                     }
                 };
             }
             _ => {
-                let paths = get_path(&tokens[0]);
+                let paths = get_path(&token[0]);
                 if paths == "" {
-                    println!("{}: command not found", tokens[0]);
+                    println!("{}: command not found", token[0]);
                     continue;
                 }
-                let output = Command::new(tokens[0])
-                    .args(&tokens[1..])
+                let output = Command::new(token[0])
+                    .args(&token[1..])
                     .output()
                     .expect("Cant execute the command")
                     .stdout;
