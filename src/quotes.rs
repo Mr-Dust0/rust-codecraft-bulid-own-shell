@@ -35,10 +35,6 @@ pub fn replace_escaped_chars(userinput: &mut Vec<String>, escaped_chars: Vec<cha
 
 pub fn noquotes(s: &str) -> String {
     let mut st = s.trim().to_string();
-    while st.contains("\\") {
-        let index_1 = st.find("\\").unwrap();
-        st = st[..index_1].to_string() + &st[index_1 + 1..];
-    }
     st.push(' ');
 
     return st;
@@ -87,39 +83,6 @@ pub fn handle_quotes_last(quote: char, userinput: &[&str]) -> Vec<String> {
         for token in rest {
             tokens.push(String::from(token));
         }
-    }
-
-    return tokens;
-}
-
-pub fn handle_quotes(quote: char, userinput: &[&str]) -> Vec<String> {
-    let mut collected_userinput = userinput.join(" ");
-    let mut tokens = Vec::new();
-
-    if collected_userinput.contains(quote) == false {
-        let tokens: Vec<&str> = collected_userinput.split(" ").collect();
-        return vec![tokens.join(" ")];
-    }
-    while collected_userinput.contains(quote) {
-        let index_1 = collected_userinput.find(quote).unwrap();
-        if collected_userinput.contains('"') {
-            let indexdq_1 = collected_userinput.find(quote).unwrap();
-            if indexdq_1 < index_1 {
-                let tokens: Vec<&str> = collected_userinput.split(" ").collect();
-                return vec![tokens.join(" ")];
-            }
-        }
-
-        let index_2 = collected_userinput[index_1 + 1..].find(quote).unwrap() + index_1 + 1;
-
-        let mut token = String::new();
-        let _ = &collected_userinput[index_1 + 1..index_2].clone_into(&mut token);
-        if collected_userinput.chars().nth(0).unwrap() == ' ' {
-            token.insert_str(0, " ");
-        }
-        tokens.push(token.clone());
-
-        collected_userinput = String::from(&collected_userinput[index_2 + 1..]);
     }
 
     return tokens;
