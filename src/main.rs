@@ -111,6 +111,7 @@ fn main() {
                     _ => {
                         let mut found = false;
                         for p in paths.split(":") {
+                            // lsdjfdlkjaf
                             let pa = Path::new(p).join(token[1]);
                             if pa.exists() && !found {
                                 println!(
