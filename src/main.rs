@@ -1,7 +1,6 @@
 use std::env;
 mod quotes;
 mod redirect;
-#[allow(unused_imports)]
 use std::io::{self, Write};
 use std::path::Path;
 use std::process::Command;
