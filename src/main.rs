@@ -1,18 +1,16 @@
-use std::ptr::write;
-use std::{env, fs};
+use std::env;
 mod quotes;
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use std::os::unix::process::CommandExt;
 use std::path::Path;
-use std::process::{Command, Output};
+use std::process::Command;
 fn main() {
     let paths = env::var("PATH").unwrap();
-    'outer: loop {
+    loop {
         let mut escaped_chars = Vec::new();
         print!("$ ");
         io::stdout().flush().unwrap();
-        // Wait for user input
+
         let stdin = io::stdin();
         let mut trimmed_input = String::new();
         stdin.read_line(&mut trimmed_input).unwrap();
@@ -23,7 +21,6 @@ fn main() {
         let tokens: Vec<&str> = trimmed_input.split(" ").collect();
         let mut arguments = Vec::new();
 
-        let mut args = tokens[1..].to_vec();
         escaped_chars = quotes::handle_backslash(&mut test);
 
         match tokens[0].chars().nth(0) {
@@ -38,21 +35,13 @@ fn main() {
                     println!("{}: command not found", arguments[0]);
                     continue;
                 }
-                //println!("{:?}", arguments);
-                //println!("{:?}", paths);
-                //let pa = Path::new(&paths);
-                //println!("{}", pa.display());
-                //
-                //println!("{}", paths);
+
                 let mut command = Command::new(paths.trim());
                 for arg in arguments {
                     command.arg(arg.trim());
                 }
                 let output = command.output().expect("Failed to execute command");
 
-                //.arg(&arguments[1].trim()) // Execute the command with space handling
-                //.output()
-                //.expect("Failed to execute command");
                 print!("{}", String::from_utf8(output.stdout).unwrap());
 
                 continue;
@@ -60,7 +49,6 @@ fn main() {
             _ => {}
         }
 
-        //println!("{a}", test);
         if test.contains('"') && test.contains("'") {
             let indexdq = trimmed_input.find('"');
             let indexsq = trimmed_input.find("'");
@@ -87,7 +75,6 @@ fn main() {
             }
         } else if test.contains("'") {
             arguments = quotes::handle_quotes_last('\'', &tokens[1..]);
-            // Adding an comment so that i can push
         } else {
             if token[0] == "echo" {
                 escaped_chars = quotes::handle_backslash(&mut input2);
@@ -97,34 +84,24 @@ fn main() {
             if token[0] == "echo" {
                 quotes::replace_escaped_chars(&mut arguments, escaped_chars);
             }
-            // Adding an comment to that i can push again
         }
 
-        //let arguments = handle_quotes('\'', &tokens[1..]);
-        //let v2: Vec<&str> = arguments.iter().map(|s| s.as_str()).collect();
-        //let arguments = handle_quotes_last('"', &tokens[1..]);
-        //println!("{:?}", arguments);
         match token[0] {
             "exit" => std::process::exit(0),
             "echo" => {
-                let mut file_path = handle_stdout_redirect(&token[0], &mut arguments);
+                let mut file_path = handle_stdout_redirect(&mut arguments);
 
-                //println!("{:?}", arguments);
-                let mut file_path_err = handle_stderr_redirect(&token[0], &mut arguments);
+                let mut file_path_err = handle_stderr_redirect(&mut arguments);
 
                 match writeln!(file_path, "{}", &arguments[..].join("")) {
                     Ok(_) => {
                         continue;
                     }
                     Err(_) => {
-                        writeln!(file_path_err, "Cant write to that file");
+                        let _ = writeln!(file_path_err, "Cant write to that file");
                         continue;
                     }
                 }
-                writeln!(file_path, "{}", &arguments[..].join(""));
-                //println!("{}", &arguments[..].join(""));
-                continue;
-                // Adding an random comment so that i can send an push to the github
             }
             "type" => {
                 match token[1] {
@@ -147,7 +124,6 @@ fn main() {
 
                         if !found {
                             println!("{}: not found", token[1].trim())
-                            // Added coomments so that i can push again
                         }
                     }
                 };
@@ -157,16 +133,15 @@ fn main() {
                 println!("{}", current_dir.into_os_string().into_string().unwrap());
             }
             "cat" => {
-                // I dobt know what this is going wrong at the moment
-                let mut file_path = handle_stdout_redirect("cat", &mut arguments);
-                let mut file_path_err = handle_stderr_redirect("cat", &mut arguments);
+                let mut file_path = handle_stdout_redirect(&mut arguments);
+                let mut file_path_err = handle_stderr_redirect(&mut arguments);
                 let mut output = String::new();
                 for path in arguments.into_iter() {
                     if path.trim() != "" {
                         match std::fs::read_to_string(path.trim()) {
                             Ok(content) => output = output + content.trim(),
                             Err(_) => {
-                                writeln!(
+                                let _ = writeln!(
                                     file_path_err,
                                     "cat: {}: No such file or directory",
                                     path.trim()
@@ -177,7 +152,7 @@ fn main() {
                     }
                 }
                 if output != "" {
-                    writeln!(file_path, "{}", output);
+                    let _ = writeln!(file_path, "{}", output);
                 }
 
                 continue;
@@ -206,31 +181,19 @@ fn main() {
                     continue;
                 }
                 let mut command = Command::new(token[0]);
-                let arguments2 = arguments.clone();
-                let mut file_path = handle_stdout_redirect("", &mut arguments);
-                let mut file_path_err = handle_stderr_redirect("", &mut arguments);
-                //println!("{:?}", arguments);
+                let mut file_path = handle_stdout_redirect(&mut arguments);
+                let mut file_path_err = handle_stderr_redirect(&mut arguments);
 
-                for (index, arg) in arguments.into_iter().enumerate() {
+                for arg in arguments.into_iter() {
                     command.arg(arg.trim());
                 }
                 let output = command.output().expect("Failed to execute the command ");
 
                 let stdout = String::from_utf8_lossy(&output.stdout).to_string();
                 let stderr = String::from_utf8_lossy(&output.stderr).to_string();
-                write!(file_path, "{}", stdout);
-                write!(file_path_err, "{}", stderr);
-            } //if paths != "" {
-              //    // need to use the & so the loop doesnt consume the tokens so it cant be used
-              //    // outside of the loop
-              //    let mut command = Command::new(paths);
-              //    for arg in &tokens[1..] {
-              //        command.arg(arg);
-              //    }
-              //    let output = command.output().expect("failed to execute");
-              //    let stdout = String::from_utf8_lossy(&output.stdout);
-              //    print!("{}", stdout)
-              //}
+                let _ = write!(file_path, "{}", stdout);
+                let _ = write!(file_path_err, "{}", stderr);
+            }
         }
     }
 }
@@ -245,29 +208,24 @@ fn get_path(binary: &str) -> String {
     }
     return String::from("");
 }
-fn handle_stdout_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn Write> {
+fn handle_stdout_redirect(arguments: &mut Vec<String>) -> Box<dyn Write> {
     let mut file_path: Box<dyn Write> = Box::new(io::stdout());
 
-    // Iterate over the arguments to check for redirection
     let mut i = 0;
     while i < arguments.len() {
         if arguments[i].trim() == "2>" {
-            return Box::new(io::stdout()); // Return stdout on error
+            return Box::new(io::stdout());
         }
         if arguments[i].trim() == ">"
             || arguments[i].trim() == "1>"
             || arguments[i].trim() == ">>"
             || arguments[i].trim() == "1>>"
         {
-            //println!("{}", arguments[i]);
-            // Ensure there's an argument after the redirection operator
             if i + 1 < arguments.len() {
                 let path = &arguments[i + 1].trim();
 
-                // Try to open the file for writing
-                //let mut file = std::fs::File::create(path);
                 let write = arguments[i].contains(">>");
-                //println!("{}", write);
+
                 match std::fs::OpenOptions::new()
                     .create(true)
                     .write(!write)
@@ -276,13 +234,13 @@ fn handle_stdout_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
                 {
                     Ok(file) => {
                         file_path = Box::new(file);
-                        // Remove the redirection operator and the path from the arguments
-                        arguments.truncate(i); // Keep only arguments before the operator
-                        return file_path; // Return the file handle for writing
+
+                        arguments.truncate(i);
+                        return file_path;
                     }
                     Err(e) => {
                         eprintln!("Error opening file '{}': {}", path, e);
-                        return Box::new(io::stdout()); // Return stdout on error
+                        return Box::new(io::stdout());
                     }
                 }
             }
@@ -290,22 +248,19 @@ fn handle_stdout_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
         i += 1;
     }
 
-    // If no redirection was found, return stdout
-    arguments.truncate(arguments.len()); // Ensure arguments before the redirect are kept
+    arguments.truncate(arguments.len());
     file_path
 }
-fn handle_stderr_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn Write> {
+fn handle_stderr_redirect(arguments: &mut Vec<String>) -> Box<dyn Write> {
     let mut file_path: Box<dyn Write> = Box::new(io::stdout());
 
-    // Iterate over the arguments to check for redirection
     let mut i = 0;
     while i < arguments.len() {
         if arguments[i].trim() == "2>" || arguments[i].trim() == "2>>" {
             let path = &arguments[i + 1].trim();
-            //            println!("TEST ");
-            //           println!("TEST {:?}", file);
+
             let write = arguments[i].contains(">>");
-            //println!("{}", write);
+
             match std::fs::OpenOptions::new()
                 .create(true)
                 .write(!write)
@@ -314,20 +269,19 @@ fn handle_stderr_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
             {
                 Ok(file) => {
                     file_path = Box::new(file);
-                    // Remove the redirection operator and the path from the arguments
-                    arguments.truncate(i); // Keep only arguments before the operator
-                    return file_path; // Return the file handle for writing
+
+                    arguments.truncate(i);
+                    return file_path;
                 }
                 Err(e) => {
                     eprintln!("Error opening file '{}': {}", path, e);
-                    return Box::new(io::stdout()); // Return stdout on error
+                    return Box::new(io::stdout());
                 }
             }
         }
         i += 1;
     }
 
-    // If no redirection was found, return stdout
-    arguments.truncate(arguments.len()); // Ensure arguments before the redirect are kept
+    arguments.truncate(arguments.len());
     file_path
 }
