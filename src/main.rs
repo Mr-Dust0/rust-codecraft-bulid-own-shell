@@ -249,20 +249,24 @@ fn handle_stdout_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
                 let path = &arguments[i + 1].trim();
 
                 // Try to open the file for writing
-                match std::fs::OpenOptions::new()
-                    .create(true)
-                    .write(true)
-                    .open(path)
-                {
-                    Ok(file) => {
-                        file_path = Box::new(file);
-                        // Remove the redirection operator and the path from the arguments
-                        arguments.truncate(i); // Keep only arguments before the operator
-                        return file_path; // Return the file handle for writing
-                    }
-                    Err(e) => {
-                        eprintln!("Error opening file '{}': {}", path, e);
-                        return Box::new(io::stdout()); // Return stdout on error
+                if arguments[2].trim() == "2>" {
+                    file_path = Box::new(io::stderr());
+                } else {
+                    match std::fs::OpenOptions::new()
+                        .create(true)
+                        .write(true)
+                        .open(path)
+                    {
+                        Ok(file) => {
+                            file_path = Box::new(file);
+                            // Remove the redirection operator and the path from the arguments
+                            arguments.truncate(i); // Keep only arguments before the operator
+                            return file_path; // Return the file handle for writing
+                        }
+                        Err(e) => {
+                            eprintln!("Error opening file '{}': {}", path, e);
+                            return Box::new(io::stdout()); // Return stdout on error
+                        }
                     }
                 }
             }
