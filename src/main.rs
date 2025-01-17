@@ -1,12 +1,12 @@
 use std::env;
 mod quotes;
+mod redirect;
 #[allow(unused_imports)]
 use std::io::{self, Write};
 use std::path::Path;
 use std::process::Command;
 fn main() {
     // Get the path env so can check the user env when executing commands
-    let paths = env::var("PATH").unwrap();
     loop {
         let mut escaped_chars = Vec::new();
         print!("$ ");
@@ -107,9 +107,9 @@ fn main() {
             "exit" => std::process::exit(0),
             "echo" => {
                 // Get what file to put stdout to if no file is speficed then stdout is used
-                let mut file_path = handle_stdout_redirect(&mut arguments);
+                let mut file_path = redirect::handle_stdout_redirect(&mut arguments);
                 // Get what file to put stderr to if no file is speficed then stderr is used
-                let mut file_path_err = handle_stderr_redirect(&mut arguments);
+                let mut file_path_err = redirect::handle_stderr_redirect(&mut arguments);
                 // Try to write to the file for stdout if it fails write err to the stderr file
                 match writeln!(file_path, "{}", &arguments[..].join("")) {
                     Ok(_) => {
@@ -147,8 +147,8 @@ fn main() {
                 println!("{}", current_dir.into_os_string().into_string().unwrap());
             }
             "cat" => {
-                let mut file_path = handle_stdout_redirect(&mut arguments);
-                let mut file_path_err = handle_stderr_redirect(&mut arguments);
+                let mut file_path = redirect::handle_stdout_redirect(&mut arguments);
+                let mut file_path_err = redirect::handle_stderr_redirect(&mut arguments);
                 let mut output = String::new();
                 for path in arguments.into_iter() {
                     // Check to see if the argument is not empty
@@ -182,10 +182,12 @@ fn main() {
                 // users home dir
                 let home = env::var("HOME").unwrap();
                 let full_path = if token[1].chars().nth(0).unwrap() == '~' {
+                    // replace ~ with home dir
                     token[1].replace("~", &home)
                 } else {
                     token[1].to_string()
                 };
+                // Change directory and print error if the path does not exist.
                 match std::env::set_current_dir(full_path) {
                     Ok(_) => {
                         continue;
@@ -196,21 +198,26 @@ fn main() {
                     }
                 };
             }
+            // Handle userinput if the command entered was  not an bulitin command.
             _ => {
+                // See if the command can be found in the Path variable
                 let paths = get_path(&token[0]);
                 if paths == "" {
                     println!("{}: command not found", token[0]);
                     continue;
                 }
                 let mut command = Command::new(token[0]);
-                let mut file_path = handle_stdout_redirect(&mut arguments);
-                let mut file_path_err = handle_stderr_redirect(&mut arguments);
+                let mut file_path = redirect::handle_stdout_redirect(&mut arguments);
+                let mut file_path_err = redirect::handle_stderr_redirect(&mut arguments);
 
+                // Add arguments to the command but remove the line break on some arguments that
+                // are entered
                 for arg in arguments.into_iter() {
                     command.arg(arg.trim());
                 }
                 let output = command.output().expect("Failed to execute the command ");
 
+                // Output the correct stdout and stderr to the correct file
                 let stdout = String::from_utf8_lossy(&output.stdout).to_string();
                 let stderr = String::from_utf8_lossy(&output.stderr).to_string();
                 let _ = write!(file_path, "{}", stdout);
@@ -220,90 +227,17 @@ fn main() {
     }
 }
 
+// Get the path of the binary to be executed by using the path varibale in the users shell
 fn get_path(binary: &str) -> String {
     let paths = env::var("PATH").unwrap();
     for p in paths.split(":") {
+        // Add binary name to end of PATH and check if the file exists and return that file if it
+        // exists
         let pa = Path::new(p).join(binary);
         if pa.exists() {
             return pa.into_os_string().into_string().unwrap();
         }
     }
+    //if the path cannot be found then return an empty string
     return String::from("");
-}
-fn handle_stdout_redirect(arguments: &mut Vec<String>) -> Box<dyn Write> {
-    let mut file_path: Box<dyn Write> = Box::new(io::stdout());
-
-    let mut i = 0;
-    while i < arguments.len() {
-        if arguments[i].trim() == "2>" {
-            return Box::new(io::stdout());
-        }
-        if arguments[i].trim() == ">"
-            || arguments[i].trim() == "1>"
-            || arguments[i].trim() == ">>"
-            || arguments[i].trim() == "1>>"
-        {
-            if i + 1 < arguments.len() {
-                let path = &arguments[i + 1].trim();
-
-                let write = arguments[i].contains(">>");
-
-                match std::fs::OpenOptions::new()
-                    .create(true)
-                    .write(!write)
-                    .append(write)
-                    .open(path)
-                {
-                    Ok(file) => {
-                        file_path = Box::new(file);
-
-                        arguments.truncate(i);
-                        return file_path;
-                    }
-                    Err(e) => {
-                        eprintln!("Error opening file '{}': {}", path, e);
-                        return Box::new(io::stdout());
-                    }
-                }
-            }
-        }
-        i += 1;
-    }
-
-    arguments.truncate(arguments.len());
-    file_path
-}
-fn handle_stderr_redirect(arguments: &mut Vec<String>) -> Box<dyn Write> {
-    let mut file_path: Box<dyn Write> = Box::new(io::stdout());
-
-    let mut i = 0;
-    while i < arguments.len() {
-        if arguments[i].trim() == "2>" || arguments[i].trim() == "2>>" {
-            let path = &arguments[i + 1].trim();
-
-            let write = arguments[i].contains(">>");
-
-            match std::fs::OpenOptions::new()
-                .create(true)
-                .write(!write)
-                .append(write)
-                .open(path)
-            {
-                Ok(file) => {
-                    file_path = Box::new(file);
-
-                    arguments.truncate(i);
-                    return file_path;
-                }
-                Err(e) => {
-                    eprintln!("Error opening file '{}': {}", path, e);
-                    return Box::new(io::stdout());
-                }
-            }
-        }
-        i += 1;
-    }
-
-    arguments.truncate(arguments.len());
-    file_path
 }
