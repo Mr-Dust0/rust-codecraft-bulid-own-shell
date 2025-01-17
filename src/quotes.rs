@@ -1,3 +1,5 @@
+use std::os::unix::raw::pthread_t;
+
 pub fn handle_backslash(userinput: &mut String) -> Vec<char> {
     let mut escaped_characters = Vec::new();
     while userinput.contains("\\") {
@@ -58,12 +60,14 @@ pub fn handle_quotes_last(quote: char, userinput: &[&str]) -> Vec<String> {
         //println!("Input {}", &collected_userinput[index_1 + 1..index_2]);
         let mut token = String::new();
         let _ = &collected_userinput[index_1 + 1..index_2].clone_into(&mut token);
+        collected_userinput = String::from(&collected_userinput[index_2 + 1..]);
         if collected_userinput.chars().nth(0).unwrap() == ' ' {
             //println!("{}", collected_userinput);
-            token.insert_str(0, " ");
+            println!("{}", collected_userinput);
+            // token.pop();
+            token.push(' ');
         }
-        collected_userinput = String::from(&collected_userinput[index_2 + 1..]);
-        tokens.push(token.clone().trim().to_string());
+        tokens.push(token.clone().to_string());
         //println!("Token {}", token);
     }
     if collected_userinput != "" {
