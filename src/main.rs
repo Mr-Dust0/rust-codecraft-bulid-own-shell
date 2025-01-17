@@ -107,7 +107,7 @@ fn main() {
         match token[0] {
             "exit" => std::process::exit(0),
             "echo" => {
-                let mut file_path = handle_stdout_redirect_bultin(&token[0], &mut arguments);
+                let mut file_path = handle_stdout_redirect(&token[0], &mut arguments);
 
                 match writeln!(file_path, "{}", &arguments[..].join("")) {
                     Ok(_) => {
@@ -156,13 +156,18 @@ fn main() {
             "cat" => {
                 // I dobt know what this is going wrong at the moment
                 let mut file_path = handle_stdout_redirect("cat", &mut arguments);
+                let mut file_path_err = handle_stderr_redirect("cat", &mut arguments);
                 let mut output = String::new();
                 for path in arguments.into_iter() {
                     if path.trim() != "" {
                         match std::fs::read_to_string(path.trim()) {
                             Ok(content) => output = output + content.trim(),
                             Err(_) => {
-                                println!("cat: {}: No such file or directory", path.trim());
+                                write!(
+                                    file_path_err,
+                                    "cat: {}: No such file or directory",
+                                    path.trim()
+                                );
                                 continue;
                             }
                         }
@@ -279,44 +284,31 @@ fn handle_stdout_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
     arguments.truncate(arguments.len()); // Ensure arguments before the redirect are kept
     file_path
 }
-fn handle_stdout_redirect_bultin(command: &str, arguments: &mut Vec<String>) -> Box<dyn Write> {
+fn handle_stderr_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn Write> {
     let mut file_path: Box<dyn Write> = Box::new(io::stdout());
 
     // Iterate over the arguments to check for redirection
     let mut i = 0;
     while i < arguments.len() {
-        if arguments[i].trim() == ">" || arguments[i].trim() == "1>" || arguments[i].trim() == "2>"
-        {
+        if arguments[i].trim() == "2>" {
             //println!("{}", arguments[i]);
             // Ensure there's an argument after the redirection operator
             if i + 1 < arguments.len() {
                 let path = &arguments[i + 1].trim();
-
-                // Try to open the file for writing
-                if arguments[i].trim() == "2>" {
-                    file_path = Box::new(io::stderr());
-                    std::fs::OpenOptions::new()
-                        .create(true)
-                        .write(true)
-                        .open(path);
-                    arguments.truncate(i); // Keep only arguments before the operator
-                    return file_path;
-                } else {
-                    match std::fs::OpenOptions::new()
-                        .create(true)
-                        .write(true)
-                        .open(path)
-                    {
-                        Ok(file) => {
-                            file_path = Box::new(file);
-                            // Remove the redirection operator and the path from the arguments
-                            arguments.truncate(i); // Keep only arguments before the operator
-                            return file_path; // Return the file handle for writing
-                        }
-                        Err(e) => {
-                            eprintln!("Error opening file '{}': {}", path, e);
-                            return Box::new(io::stdout()); // Return stdout on error
-                        }
+                match std::fs::OpenOptions::new()
+                    .create(true)
+                    .write(true)
+                    .open(path)
+                {
+                    Ok(file) => {
+                        file_path = Box::new(file);
+                        // Remove the redirection operator and the path from the arguments
+                        arguments.truncate(i); // Keep only arguments before the operator
+                        return file_path; // Return the file handle for writing
+                    }
+                    Err(e) => {
+                        eprintln!("Error opening file '{}': {}", path, e);
+                        return Box::new(io::stdout()); // Return stdout on error
                     }
                 }
             }
