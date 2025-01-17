@@ -147,7 +147,7 @@ fn main() {
                         match std::fs::read_to_string(path.trim()) {
                             Ok(content) => output = output + content.as_str(),
                             Err(_) => {
-                                println!("cat: {}: No such file or directory", path);
+                                println!("cat: {}: No such file or directory", path.trim());
                                 continue 'outer;
                             }
                         }
