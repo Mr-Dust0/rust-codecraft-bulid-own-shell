@@ -108,13 +108,14 @@ fn main() {
             "exit" => std::process::exit(0),
             "echo" => {
                 let mut file_path = handle_stdout_redirect(&token[0], &mut arguments);
+                let mut file_path_err = handle_stdout_redirect(&token[0], &mut arguments);
 
                 match writeln!(file_path, "{}", &arguments[..].join("")) {
                     Ok(_) => {
                         continue;
                     }
                     Err(_) => {
-                        println!("Cant write to that file");
+                        writeln!(file_path_err, "Cant write to that file");
                         continue;
                     }
                 }
@@ -246,8 +247,7 @@ fn handle_stdout_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
     // Iterate over the arguments to check for redirection
     let mut i = 0;
     while i < arguments.len() {
-        if arguments[i].trim() == ">" || arguments[i].trim() == "1>" || arguments[i].trim() == "2>"
-        {
+        if arguments[i].trim() == ">" || arguments[i].trim() == "1>" {
             //println!("{}", arguments[i]);
             // Ensure there's an argument after the redirection operator
             if i + 1 < arguments.len() {
