@@ -128,8 +128,9 @@ fn main() {
                     "echo" | "type" | "exit" | "pwd" | "cd" => {
                         println!("{} is a shell builtin", token[1].trim());
                     }
+                    // Hanle all other arguments that are not bultins
                     _ => {
-                        // If the executable is not an bulitin see if the file is in the env
+                        // Check to see if the command actually exists
                         let paths = get_path(&token[1]);
                         if paths == "" {
                             println!("{}: not found", token[1]);
@@ -140,6 +141,7 @@ fn main() {
                     }
                 };
             }
+            // Print the current working directory
             "pwd" => {
                 let current_dir = std::env::current_dir().expect("cant get the current dir");
                 println!("{}", current_dir.into_os_string().into_string().unwrap());
@@ -149,9 +151,13 @@ fn main() {
                 let mut file_path_err = handle_stderr_redirect(&mut arguments);
                 let mut output = String::new();
                 for path in arguments.into_iter() {
+                    // Check to see if the argument is not empty
                     if path.trim() != "" {
+                        // Read the file and if it can be read then add the content in the file to
+                        // the content variable that will be printed latter.
                         match std::fs::read_to_string(path.trim()) {
                             Ok(content) => output = output + content.trim(),
+                            // Print error if file cant be read
                             Err(_) => {
                                 let _ = writeln!(
                                     file_path_err,
@@ -163,6 +169,8 @@ fn main() {
                         }
                     }
                 }
+                // Check to see if any content was actaully read before printing because will print
+                // an new line even if output is not null
                 if output != "" {
                     let _ = writeln!(file_path, "{}", output);
                 }
@@ -170,6 +178,8 @@ fn main() {
                 continue;
             }
             "cd" => {
+                // Get the home variable in case the user enters ~ so we can expand that to the
+                // users home dir
                 let home = env::var("HOME").unwrap();
                 let full_path = if token[1].chars().nth(0).unwrap() == '~' {
                     token[1].replace("~", &home)
