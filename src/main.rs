@@ -176,7 +176,9 @@ fn main() {
                         }
                     }
                 }
-                writeln!(file_path, "{}", output);
+                if output != "" {
+                    writeln!(file_path, "{}", output);
+                }
 
                 continue;
             }
