@@ -265,7 +265,7 @@ fn handle_stdout_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
                 // Try to open the file for writing
                 //let mut file = std::fs::File::create(path);
                 let write = arguments[i].contains(">>");
-                println!("{}", write);
+                //println!("{}", write);
                 match std::fs::OpenOptions::new()
                     .create(true)
                     .append(write)
@@ -302,10 +302,11 @@ fn handle_stderr_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
             let path = &arguments[i + 1].trim();
             //            println!("TEST ");
             //           println!("TEST {:?}", file);
+            let write = arguments[i].contains(">>");
 
             match std::fs::OpenOptions::new()
-                .create(false)
-                .write(false)
+                .create(true)
+                .append(write)
                 .open(path)
             {
                 Ok(file) => {
