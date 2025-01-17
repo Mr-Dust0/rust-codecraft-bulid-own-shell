@@ -205,6 +205,7 @@ fn main() {
                 let arguments2 = arguments.clone();
                 //println!("{:?}", arguments);
                 let mut file_path = handle_stdout_redirect("", &mut arguments);
+                let mut file_path_err = handle_stderr_redirect("", &mut arguments);
                 //println!("{:?}", arguments);
 
                 for (index, arg) in arguments.into_iter().enumerate() {
@@ -214,8 +215,8 @@ fn main() {
 
                 let stdout = String::from_utf8_lossy(&output.stdout).to_string();
                 let stderr = String::from_utf8_lossy(&output.stderr).to_string();
-                write!(file_path, "{}", stderr);
                 write!(file_path, "{}", stdout);
+                write!(file_path_err, "{}", stderr);
             } //if paths != "" {
               //    // need to use the & so the loop doesnt consume the tokens so it cant be used
               //    // outside of the loop
@@ -247,6 +248,22 @@ fn handle_stdout_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
     // Iterate over the arguments to check for redirection
     let mut i = 0;
     while i < arguments.len() {
+        if arguments[i].trim() == "2>" {
+            match std::fs::OpenOptions::new()
+                .create(true)
+                .write(true)
+                .open("/dev/null")
+            {
+                Ok(file) => {
+                    file_path = Box::new(file);
+                    // Remove the redirection operator and the path from the arguments
+                    return file_path; // Return the file handle for writing
+                }
+                Err(e) => {
+                    return Box::new(io::stdout()); // Return stdout on error
+                }
+            }
+        }
         if arguments[i].trim() == ">" || arguments[i].trim() == "1>" {
             //println!("{}", arguments[i]);
             // Ensure there's an argument after the redirection operator
@@ -291,10 +308,10 @@ fn handle_stderr_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
     let mut i = 0;
     while i < arguments.len() {
         if arguments[i].trim() == "2>" {
-            //println!("{}", arguments[i]);
             // Ensure there's an argument after the redirection operator
             if i + 1 < arguments.len() {
                 let path = &arguments[i + 1].trim();
+
                 match std::fs::OpenOptions::new()
                     .create(true)
                     .write(true)
@@ -320,58 +337,3 @@ fn handle_stderr_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
     arguments.truncate(arguments.len()); // Ensure arguments before the redirect are kept
     file_path
 }
-
-//fn handle_stdout_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn std::io::Write> {
-//    //let mut command = Command::new(command);
-//    let arguments2 = arguments.clone();
-//    let mut arguments3 = arguments.clone();
-//
-//    let mut file_path: Box<dyn Write> = Box::new(io::stdout());
-//
-//    // Check for redirection operator (">" or "1>")
-//    for (index, arg) in arguments.iter().enumerate() {
-//        if arg.trim() == ">" || arg.trim() == "1>" {
-//            if index + 1 < arguments.len() {
-//                // Ensure we don't go out of bounds
-//                // Here, we expect a file path after the operator
-//                let path = &arguments[index + 1];
-//                arguments.truncate(index);
-//
-//                // Open the file for writing and assign to file_path
-//                match std::fs::OpenOptions::new()
-//                    .create(true)
-//                    .write(true)
-//                    .open(path)
-//                {
-//                    Ok(file) => {
-//                        file_path = Box::new(file);
-//                        return file_path;
-//                    }
-//                    Err(e) => {}
-//                }
-//            }
-//        } else {
-//            arguments3.push(arg.clone());
-//        }
-//    }
-//    return file_path;
-//
-//    // println!("File path: {:?}", arguments2);
-//
-//    //for (index, arg) in arguments.into_iter().enumerate() {
-//    //    if arg.trim() == ">" || arg.trim() == "1>" {
-//    //        //println!("File path: {}", arguments2[index + 1]);
-//    //        file_path = arguments2[index + 1].clone();
-//    //        break;
-//    //    }
-//    //}
-//    //let output = command.output().expect("Failed to execute the command ");
-//    //
-//    //let stdout = String::from_utf8_lossy(&output.stdout).to_string();
-//    //let stderr = String::from_utf8_lossy(&output.stderr).to_string();
-//    //if file_path != String::from("") {
-//    //    let write_resonse = fs::write(file_path.trim(), &stdout);
-//    //} else {
-//    //    print!("{}", stdout);
-//    //}
-//}
