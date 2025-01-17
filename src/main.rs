@@ -122,27 +122,20 @@ fn main() {
                 }
             }
             "type" => {
+                // See if the command being passaed as an argumnt to type is an bultin that this
+                // shell offers.
                 match token[1] {
                     "echo" | "type" | "exit" | "pwd" | "cd" => {
                         println!("{} is a shell builtin", token[1].trim());
                     }
                     _ => {
-                        let mut found = false;
-                        for p in paths.split(":") {
-                            // lsdjfdlkjaf
-                            let pa = Path::new(p).join(token[1]);
-                            if pa.exists() && !found {
-                                println!(
-                                    "{} is {}",
-                                    tokens[1].trim(),
-                                    pa.into_os_string().into_string().unwrap()
-                                );
-                                found = true;
-                            }
-                        }
-
-                        if !found {
-                            println!("{}: not found", token[1].trim())
+                        // If the executable is not an bulitin see if the file is in the env
+                        let paths = get_path(&token[1]);
+                        if paths == "" {
+                            println!("{}:  not found", token[0]);
+                            continue;
+                        } else {
+                            println!("{} is {}", tokens[1].trim(), paths);
                         }
                     }
                 };
