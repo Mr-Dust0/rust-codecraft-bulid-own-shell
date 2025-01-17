@@ -5,31 +5,36 @@ use std::io::{self, Write};
 use std::path::Path;
 use std::process::Command;
 fn main() {
+    // Get the path env so can check the user env when executing commands
     let paths = env::var("PATH").unwrap();
     loop {
         let mut escaped_chars = Vec::new();
         print!("$ ");
+        // Flush it so that the dollar is printed to the screen
         io::stdout().flush().unwrap();
-
         let stdin = io::stdin();
         let mut trimmed_input = String::new();
+        // Read userinput into trimmed_input
         stdin.read_line(&mut trimmed_input).unwrap();
         let input = trimmed_input.clone();
         let mut input2 = trimmed_input.clone();
         let mut test = trimmed_input.clone();
+        // Split userinput on space to get the command the user wants to execute
         let token: Vec<&str> = input.trim().split(" ").collect();
         let tokens: Vec<&str> = trimmed_input.split(" ").collect();
         let mut arguments = Vec::new();
 
+        // Replace all characters that are backsashed
         escaped_chars = quotes::handle_backslash(&mut test);
 
+        // Handle the input when the command has spaces in it so we check to see if the commands
+        // starts with an quote of somekind
         match tokens[0].chars().nth(0) {
             Some(first_char) if first_char == '\'' || first_char == '"' => {
-                if first_char == '\'' {
-                    arguments = quotes::handle_quotes_last('\'', &tokens[..]);
-                } else {
-                    arguments = quotes::handle_quotes_last('"', &tokens[..]);
-                }
+                // Tokenize the userinput
+                arguments = quotes::handle_quotes_last(first_char, &tokens[..]);
+                // Get the path form the users env variable print command not found if the path
+                // cannot be found
                 let paths = get_path(&arguments[0].trim());
                 if paths == "" {
                     println!("{}: command not found", arguments[0]);
@@ -38,32 +43,41 @@ fn main() {
 
                 let mut command = Command::new(paths.trim());
                 for arg in arguments {
+                    // Add all the arguments but trim the argument so the arguments dont have an
+                    // trailing new line could use map instead
                     command.arg(arg.trim());
                 }
                 let output = command.output().expect("Failed to execute command");
-
+                // Print output from the command executed
                 print!("{}", String::from_utf8(output.stdout).unwrap());
-
                 continue;
             }
+            // Handle the case when we cant get the frist charater of the token
             _ => {}
         }
 
+        // see if the userinput contains both quotes with backslashed characters converted to an £
         if test.contains('"') && test.contains("'") {
             let indexdq = trimmed_input.find('"');
             let indexsq = trimmed_input.find("'");
+            // check what quote comes first
             if indexsq > indexdq {
+                // Check if command being run is echo so can handle backslashed characters as they
+                // act differenlty with echo
                 if token[0] == "echo" {
                     escaped_chars = quotes::handle_backslash(&mut input2);
                 }
                 let tokens: Vec<&str> = input2.split(" ").collect();
+                // Tokwnize the arguments based on qauotes.
                 arguments = quotes::handle_quotes_last('"', &tokens[1..]);
                 if token[0] == "echo" {
                     quotes::replace_escaped_chars(&mut arguments, escaped_chars);
                 }
             } else {
+                // if the quote is '' then the backslasah is ingored.
                 arguments = quotes::handle_quotes('\'', &tokens[1..]);
             }
+        // see if the userinput contains double quotes backslashed characters converted to an £
         } else if test.contains('"') {
             if token[0] == "echo" {
                 escaped_chars = quotes::handle_backslash(&mut input2);
@@ -73,8 +87,10 @@ fn main() {
             if token[0] == "echo" {
                 quotes::replace_escaped_chars(&mut arguments, escaped_chars);
             }
+        // see if the userinput contains single quotes backslashed characters converted to an £
         } else if test.contains("'") {
             arguments = quotes::handle_quotes_last('\'', &tokens[1..]);
+            // User input with backslashed characters removed doesnt contain any quotes.
         } else {
             if token[0] == "echo" {
                 escaped_chars = quotes::handle_backslash(&mut input2);
@@ -86,13 +102,15 @@ fn main() {
             }
         }
 
+        // Start the match for the command to be executed.
         match token[0] {
             "exit" => std::process::exit(0),
             "echo" => {
+                // Get what file to put stdout to if no file is speficed then stdout is used
                 let mut file_path = handle_stdout_redirect(&mut arguments);
-
+                // Get what file to put stderr to if no file is speficed then stderr is used
                 let mut file_path_err = handle_stderr_redirect(&mut arguments);
-
+                // Try to write to the file for stdout if it fails write err to the stderr file
                 match writeln!(file_path, "{}", &arguments[..].join("")) {
                     Ok(_) => {
                         continue;
