@@ -105,7 +105,8 @@ fn main() {
         match token[0] {
             "exit" => std::process::exit(0),
             "echo" => {
-                println!("{}", &arguments[..].join(""));
+                handle_stdout_redirect(&token[0], &arguments);
+                //println!("{}", &arguments[..].join(""));
                 continue;
                 // Adding an random comment so that i can send an push to the github
             }
@@ -218,4 +219,29 @@ fn get_path(binary: &str) -> String {
         }
     }
     return String::from("");
+}
+fn handle_stdout_redirect(command: &str, arguments: &Vec<String>) {
+    let mut command = Command::new(command);
+    let arguments2 = arguments.clone();
+    let mut file_path = String::new();
+
+    for (index, arg) in arguments.into_iter().enumerate() {
+        if arg.trim() == ">" || arg.trim() == "1>" {
+            //println!("File path: {}", arguments2[index + 1]);
+            file_path = arguments2[index + 1].clone();
+            break;
+        }
+        command.arg(arg.trim());
+    }
+    let output = command
+        .output()
+        .expect("Failed to execute the command ")
+        .stdout;
+
+    let stdout = String::from_utf8_lossy(&output).to_string();
+    if file_path != String::from("") {
+        let write_resonse = fs::write(file_path.trim(), &stdout);
+    } else {
+        print!("{}", stdout);
+    }
 }
