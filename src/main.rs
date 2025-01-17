@@ -141,6 +141,7 @@ fn main() {
                 println!("{}", current_dir.into_os_string().into_string().unwrap());
             }
             "cat" => {
+                // I dobt know what this is going wrong at the moment
                 let mut output = String::new();
                 for path in arguments.into_iter() {
                     if path.trim() != "" {
