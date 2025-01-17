@@ -1,10 +1,10 @@
-use std::env;
+use std::{env, fs};
 mod quotes;
 #[allow(unused_imports)]
 use std::io::{self, Write};
 use std::os::unix::process::CommandExt;
 use std::path::Path;
-use std::process::Command;
+use std::process::{Command, Output};
 fn main() {
     let paths = env::var("PATH").unwrap();
     loop {
@@ -101,7 +101,7 @@ fn main() {
         //let arguments = handle_quotes('\'', &tokens[1..]);
         //let v2: Vec<&str> = arguments.iter().map(|s| s.as_str()).collect();
         //let arguments = handle_quotes_last('"', &tokens[1..]);
-        //        println!("{:?}", arguments);
+        //println!("{:?}", arguments);
         match token[0] {
             "exit" => std::process::exit(0),
             "echo" => {
@@ -171,25 +171,40 @@ fn main() {
                     println!("{}: command not found", token[0]);
                     continue;
                 }
-                let output = Command::new(token[0])
-                    .args(&token[1..])
+                let mut command = Command::new(token[0]);
+                let arguments2 = arguments.clone();
+                let mut file_path = String::new();
+
+                for (index, arg) in arguments.into_iter().enumerate() {
+                    if arg.trim() == ">" {
+                        //println!("File path: {}", arguments2[index + 1]);
+                        file_path = arguments2[index + 1].clone();
+                        break;
+                    }
+                    command.arg(arg.trim());
+                }
+                let output = command
                     .output()
-                    .expect("Cant execute the command")
+                    .expect("Failed to execute the command ")
                     .stdout;
-                let stdout = String::from_utf8_lossy(&output);
-                print!("{}", stdout)
-                //if paths != "" {
-                //    // need to use the & so the loop doesnt consume the tokens so it cant be used
-                //    // outside of the loop
-                //    let mut command = Command::new(paths);
-                //    for arg in &tokens[1..] {
-                //        command.arg(arg);
-                //    }
-                //    let output = command.output().expect("failed to execute");
-                //    let stdout = String::from_utf8_lossy(&output.stdout);
-                //    print!("{}", stdout)
-                //}
-            }
+
+                let stdout = String::from_utf8_lossy(&output).to_string();
+                if file_path != String::from("") {
+                    let write_resonse = fs::write(file_path.trim(), &stdout);
+                } else {
+                    print!("{}", stdout);
+                }
+            } //if paths != "" {
+              //    // need to use the & so the loop doesnt consume the tokens so it cant be used
+              //    // outside of the loop
+              //    let mut command = Command::new(paths);
+              //    for arg in &tokens[1..] {
+              //        command.arg(arg);
+              //    }
+              //    let output = command.output().expect("failed to execute");
+              //    let stdout = String::from_utf8_lossy(&output.stdout);
+              //    print!("{}", stdout)
+              //}
         }
     }
 }
