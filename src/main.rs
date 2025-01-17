@@ -295,6 +295,10 @@ fn handle_stdout_redirect_bultin(command: &str, arguments: &mut Vec<String>) -> 
                 // Try to open the file for writing
                 if arguments[i].trim() == "2>" {
                     file_path = Box::new(io::stderr());
+                    std::fs::OpenOptions::new()
+                        .create(true)
+                        .write(true)
+                        .open(path);
                     arguments.truncate(i); // Keep only arguments before the operator
                     return file_path;
                 } else {
