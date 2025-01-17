@@ -159,7 +159,7 @@ fn main() {
                 for path in arguments.into_iter() {
                     if path.trim() != "" {
                         match std::fs::read_to_string(path.trim()) {
-                            Ok(content) => output = output + content.as_str(),
+                            Ok(content) => output = output + content.trim(),
                             Err(_) => {
                                 println!("cat: {}: No such file or directory", path.trim());
                                 continue;
@@ -167,7 +167,7 @@ fn main() {
                         }
                     }
                 }
-                write!(file_path, "{}", output);
+                writeln!(file_path, "{}", output);
 
                 continue;
             }
