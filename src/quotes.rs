@@ -67,7 +67,10 @@ pub fn handle_quotes_last(quote: char, userinput: &[&str]) -> Vec<String> {
     }
     if collected_userinput != "" {
         collected_userinput.pop();
-        tokens.push(collected_userinput);
+        let rest = collected_userinput.split_whitespace();
+        for token in rest {
+            tokens.push(String::from(token));
+        }
     }
 
     //println!("{}", collected_userinput);

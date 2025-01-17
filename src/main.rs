@@ -84,7 +84,7 @@ fn main() {
                 quotes::replace_escaped_chars(&mut arguments, escaped_chars);
             }
         } else if test.contains("'") {
-            arguments = quotes::handle_quotes('\'', &tokens[1..]);
+            arguments = quotes::handle_quotes_last('\'', &tokens[1..]);
             // Adding an comment so that i can push
         } else {
             if token[0] == "echo" {
@@ -224,6 +224,7 @@ fn handle_stdout_redirect(command: &str, arguments: &Vec<String>) {
     let mut command = Command::new(command);
     let arguments2 = arguments.clone();
     let mut file_path = String::new();
+    // println!("File path: {:?}", arguments2);
 
     for (index, arg) in arguments.into_iter().enumerate() {
         if arg.trim() == ">" || arg.trim() == "1>" {
