@@ -75,7 +75,7 @@ fn main() {
                 }
             } else {
                 // if the quote is '' then the backslasah is ingored.
-                arguments = quotes::handle_quotes('\'', &tokens[1..]);
+                arguments = quotes::handle_quotes_last('\'', &tokens[1..]);
             }
         // see if the userinput contains double quotes backslashed characters converted to an £
         } else if test.contains('"') {
