@@ -249,7 +249,8 @@ fn handle_stdout_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
     // Iterate over the arguments to check for redirection
     let mut i = 0;
     while i < arguments.len() {
-        if arguments[i].trim() == ">" || arguments[i].trim() == "1>" {
+        if arguments[i].trim() == ">" || arguments[i].trim() == "1>" || arguments[i].trim() == "2>"
+        {
             // Ensure there's an argument after the redirection operator
             if i + 1 < arguments.len() {
                 let path = &arguments[i + 1].trim();
