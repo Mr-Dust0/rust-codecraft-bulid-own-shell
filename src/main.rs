@@ -1,3 +1,4 @@
+use std::ptr::write;
 use std::{env, fs};
 mod quotes;
 #[allow(unused_imports)]
@@ -105,7 +106,18 @@ fn main() {
         match token[0] {
             "exit" => std::process::exit(0),
             "echo" => {
-                handle_stdout_redirect(&token[0], &arguments);
+                let mut file_path = handle_stdout_redirect(&token[0], &mut arguments);
+
+                match writeln!(file_path, "{}", &arguments[..].join("")) {
+                    Ok(_) => {
+                        continue;
+                    }
+                    Err(_) => {
+                        println!("Cant write to that file");
+                        continue;
+                    }
+                }
+                writeln!(file_path, "{}", &arguments[..].join(""));
                 //println!("{}", &arguments[..].join(""));
                 continue;
                 // Adding an random comment so that i can send an push to the github
@@ -142,20 +154,20 @@ fn main() {
             }
             "cat" => {
                 // I dobt know what this is going wrong at the moment
-                handle_stdout_redirect("cat", &arguments);
-                //let mut output = String::new();
-                //for path in arguments.into_iter() {
-                //    if path.trim() != "" {
-                //        match std::fs::read_to_string(path.trim()) {
-                //            Ok(content) => output = output + content.as_str(),
-                //            Err(_) => {
-                //                println!("cat: {}: No such file or directory", path.trim());
-                //                continue 'outer;
-                //            }
-                //        }
-                //    }
-                //}
-                //print!("{}", output);
+                let mut file_path = handle_stdout_redirect("cat", &mut arguments);
+                let mut output = String::new();
+                for path in arguments.into_iter() {
+                    if path.trim() != "" {
+                        match std::fs::read_to_string(path.trim()) {
+                            Ok(content) => output = output + content.as_str(),
+                            Err(_) => {
+                                println!("cat: {}: No such file or directory", path.trim());
+                                continue;
+                            }
+                        }
+                    }
+                }
+                write!(file_path, "{}", output);
 
                 continue;
             }
@@ -230,28 +242,95 @@ fn get_path(binary: &str) -> String {
     }
     return String::from("");
 }
-fn handle_stdout_redirect(command: &str, arguments: &Vec<String>) {
-    let mut command = Command::new(command);
-    let arguments2 = arguments.clone();
-    let mut file_path = String::new();
-    // println!("File path: {:?}", arguments2);
+fn handle_stdout_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn Write> {
+    let mut file_path: Box<dyn Write> = Box::new(io::stdout());
 
-    for (index, arg) in arguments.into_iter().enumerate() {
-        if arg.trim() == ">" || arg.trim() == "1>" {
-            //println!("File path: {}", arguments2[index + 1]);
-            file_path = arguments2[index + 1].clone();
-            break;
+    // Iterate over the arguments to check for redirection
+    let mut i = 0;
+    while i < arguments.len() {
+        if arguments[i].trim() == ">" || arguments[i].trim() == "1>" {
+            // Ensure there's an argument after the redirection operator
+            if i + 1 < arguments.len() {
+                let path = &arguments[i + 1].trim();
+
+                // Try to open the file for writing
+                match std::fs::OpenOptions::new()
+                    .create(true)
+                    .write(true)
+                    .open(path)
+                {
+                    Ok(file) => {
+                        file_path = Box::new(file);
+                        // Remove the redirection operator and the path from the arguments
+                        arguments.truncate(i); // Keep only arguments before the operator
+                        return file_path; // Return the file handle for writing
+                    }
+                    Err(e) => {
+                        eprintln!("Error opening file '{}': {}", path, e);
+                        return Box::new(io::stdout()); // Return stdout on error
+                    }
+                }
+            }
         }
-        command.arg(arg.trim());
+        i += 1;
     }
-    let output = command.output().expect("Failed to execute the command ");
 
-    let stdout = String::from_utf8_lossy(&output.stdout).to_string();
-    let stderr = String::from_utf8_lossy(&output.stderr).to_string();
-    print!("{}", stderr);
-    if file_path != String::from("") {
-        let write_resonse = fs::write(file_path.trim(), &stdout);
-    } else {
-        print!("{}", stdout);
-    }
+    // If no redirection was found, return stdout
+    arguments.truncate(arguments.len()); // Ensure arguments before the redirect are kept
+    file_path
 }
+
+//fn handle_stdout_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn std::io::Write> {
+//    //let mut command = Command::new(command);
+//    let arguments2 = arguments.clone();
+//    let mut arguments3 = arguments.clone();
+//
+//    let mut file_path: Box<dyn Write> = Box::new(io::stdout());
+//
+//    // Check for redirection operator (">" or "1>")
+//    for (index, arg) in arguments.iter().enumerate() {
+//        if arg.trim() == ">" || arg.trim() == "1>" {
+//            if index + 1 < arguments.len() {
+//                // Ensure we don't go out of bounds
+//                // Here, we expect a file path after the operator
+//                let path = &arguments[index + 1];
+//                arguments.truncate(index);
+//
+//                // Open the file for writing and assign to file_path
+//                match std::fs::OpenOptions::new()
+//                    .create(true)
+//                    .write(true)
+//                    .open(path)
+//                {
+//                    Ok(file) => {
+//                        file_path = Box::new(file);
+//                        return file_path;
+//                    }
+//                    Err(e) => {}
+//                }
+//            }
+//        } else {
+//            arguments3.push(arg.clone());
+//        }
+//    }
+//    return file_path;
+//
+//    // println!("File path: {:?}", arguments2);
+//
+//    //for (index, arg) in arguments.into_iter().enumerate() {
+//    //    if arg.trim() == ">" || arg.trim() == "1>" {
+//    //        //println!("File path: {}", arguments2[index + 1]);
+//    //        file_path = arguments2[index + 1].clone();
+//    //        break;
+//    //    }
+//    //}
+//    //let output = command.output().expect("Failed to execute the command ");
+//    //
+//    //let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+//    //let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+//    //if file_path != String::from("") {
+//    //    let write_resonse = fs::write(file_path.trim(), &stdout);
+//    //} else {
+//    //    print!("{}", stdout);
+//    //}
+//}
