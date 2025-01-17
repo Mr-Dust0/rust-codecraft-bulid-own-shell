@@ -311,11 +311,11 @@ fn handle_stderr_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
             // Ensure there's an argument after the redirection operator
             if i + 1 < arguments.len() {
                 let path = &arguments[i + 1].trim();
+                let mut file = std::fs::File::create(path);
 
                 match std::fs::OpenOptions::new()
                     .create(true)
-                    // .write(true)
-                    .append(true)
+                    .write(true)
                     .open(path)
                 {
                     Ok(file) => {
