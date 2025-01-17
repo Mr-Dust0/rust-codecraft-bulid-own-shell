@@ -142,19 +142,20 @@ fn main() {
             }
             "cat" => {
                 // I dobt know what this is going wrong at the moment
-                let mut output = String::new();
-                for path in arguments.into_iter() {
-                    if path.trim() != "" {
-                        match std::fs::read_to_string(path.trim()) {
-                            Ok(content) => output = output + content.as_str(),
-                            Err(_) => {
-                                println!("cat: {}: No such file or directory", path.trim());
-                                continue 'outer;
-                            }
-                        }
-                    }
-                }
-                print!("{}", output);
+                handle_stdout_redirect("cat", &arguments);
+                //let mut output = String::new();
+                //for path in arguments.into_iter() {
+                //    if path.trim() != "" {
+                //        match std::fs::read_to_string(path.trim()) {
+                //            Ok(content) => output = output + content.as_str(),
+                //            Err(_) => {
+                //                println!("cat: {}: No such file or directory", path.trim());
+                //                continue 'outer;
+                //            }
+                //        }
+                //    }
+                //}
+                //print!("{}", output);
 
                 continue;
             }
@@ -243,12 +244,11 @@ fn handle_stdout_redirect(command: &str, arguments: &Vec<String>) {
         }
         command.arg(arg.trim());
     }
-    let output = command
-        .output()
-        .expect("Failed to execute the command ")
-        .stdout;
+    let output = command.output().expect("Failed to execute the command ");
 
-    let stdout = String::from_utf8_lossy(&output).to_string();
+    let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+    let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+    print!("{}", stderr);
     if file_path != String::from("") {
         let write_resonse = fs::write(file_path.trim(), &stdout);
     } else {
