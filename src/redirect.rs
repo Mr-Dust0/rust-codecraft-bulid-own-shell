@@ -27,6 +27,8 @@ pub fn handle_stdout_redirect(arguments: &mut Vec<String>) -> Box<dyn Write> {
                 {
                     Ok(file) => {
                         file_path = Box::new(file);
+                        // Get rid of the > and file so they arent interperted by the command when
+                        // executed
                         arguments.truncate(i);
                         return file_path;
                     }
@@ -42,8 +44,8 @@ pub fn handle_stdout_redirect(arguments: &mut Vec<String>) -> Box<dyn Write> {
         i += 1;
     }
 
-    arguments.truncate(arguments.len());
-    file_path
+    // Return stdout if the output was not reditcted
+    return file_path;
 }
 pub fn handle_stderr_redirect(arguments: &mut Vec<String>) -> Box<dyn Write> {
     let mut file_path: Box<dyn Write> = Box::new(io::stdout());
