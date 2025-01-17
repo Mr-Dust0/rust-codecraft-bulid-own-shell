@@ -33,7 +33,7 @@ fn main() {
                 } else {
                     arguments = quotes::handle_quotes_last('"', &tokens[..]);
                 }
-                let paths = get_path(&arguments[0]);
+                let paths = get_path(&arguments[0].trim());
                 if paths == "" {
                     println!("{}: command not found", arguments[0]);
                     continue;
@@ -43,7 +43,8 @@ fn main() {
                 //let pa = Path::new(&paths);
                 //println!("{}", pa.display());
                 //
-                let mut command = Command::new(paths);
+                //println!("{}", paths);
+                let mut command = Command::new(paths.trim());
                 for arg in arguments {
                     command.arg(arg.trim());
                 }
