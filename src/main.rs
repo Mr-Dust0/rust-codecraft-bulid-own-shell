@@ -314,7 +314,8 @@ fn handle_stderr_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
 
                 match std::fs::OpenOptions::new()
                     .create(true)
-                    .write(true)
+                    // .write(true)
+                    .append(true)
                     .open(path)
                 {
                     Ok(file) => {
