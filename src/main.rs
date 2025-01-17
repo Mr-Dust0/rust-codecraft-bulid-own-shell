@@ -265,9 +265,10 @@ fn handle_stdout_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
                 // Try to open the file for writing
                 //let mut file = std::fs::File::create(path);
                 let write = arguments[i].contains(">>");
+                println!("{}", write);
                 match std::fs::OpenOptions::new()
                     .create(true)
-                    .write(write)
+                    .append(write)
                     .open(path)
                 {
                     Ok(file) => {
