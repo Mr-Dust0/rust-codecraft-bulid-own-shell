@@ -48,10 +48,12 @@ pub fn handle_stdout_redirect(arguments: &mut Vec<String>) -> Box<dyn Write> {
     return file_path;
 }
 pub fn handle_stderr_redirect(arguments: &mut Vec<String>) -> Box<dyn Write> {
-    let mut file_path: Box<dyn Write> = Box::new(io::stdout());
+    // Set defalt to stderr if no redirect is found
+    let mut file_path: Box<dyn Write> = Box::new(io::stderr());
 
     let mut i = 0;
     while i < arguments.len() {
+        // See if the arument is redirecting the stderrr
         if arguments[i].trim() == "2>" || arguments[i].trim() == "2>>" {
             let path = &arguments[i + 1].trim();
 
@@ -66,6 +68,7 @@ pub fn handle_stderr_redirect(arguments: &mut Vec<String>) -> Box<dyn Write> {
                 Ok(file) => {
                     file_path = Box::new(file);
 
+                    // Get rid of > and file
                     arguments.truncate(i);
                     return file_path;
                 }
@@ -78,6 +81,5 @@ pub fn handle_stderr_redirect(arguments: &mut Vec<String>) -> Box<dyn Write> {
         i += 1;
     }
 
-    arguments.truncate(arguments.len());
-    file_path
+    return file_path;
 }
