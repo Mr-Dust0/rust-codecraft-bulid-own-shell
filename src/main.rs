@@ -7,7 +7,7 @@ use std::path::Path;
 use std::process::{Command, Output};
 fn main() {
     let paths = env::var("PATH").unwrap();
-    loop {
+    'outer: loop {
         let mut escaped_chars = Vec::new();
         print!("$ ");
         io::stdout().flush().unwrap();
@@ -141,12 +141,20 @@ fn main() {
                 println!("{}", current_dir.into_os_string().into_string().unwrap());
             }
             "cat" => {
+                let mut output = String::new();
                 for path in arguments.into_iter() {
                     if path.trim() != "" {
-                        let content = std::fs::read_to_string(path.trim());
-                        print!("{}", content.unwrap());
+                        match std::fs::read_to_string(path.trim()) {
+                            Ok(content) => output = output + content.as_str(),
+                            Err(_) => {
+                                println!("cat: {}: No such file or directory", path);
+                                continue 'outer;
+                            }
+                        }
                     }
                 }
+                print!("{}", output);
+
                 continue;
             }
             "cd" => {
