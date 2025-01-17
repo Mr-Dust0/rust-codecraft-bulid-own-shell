@@ -249,7 +249,7 @@ fn handle_stdout_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
                 let path = &arguments[i + 1].trim();
 
                 // Try to open the file for writing
-                if arguments[2].trim() == "2>" {
+                if arguments[2].trim() == "" {
                     file_path = Box::new(io::stderr());
                     arguments.truncate(i); // Keep only arguments before the operator
                 } else {
