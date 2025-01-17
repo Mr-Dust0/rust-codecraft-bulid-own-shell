@@ -63,7 +63,7 @@ pub fn handle_quotes_last(quote: char, userinput: &[&str]) -> Vec<String> {
         collected_userinput = String::from(&collected_userinput[index_2 + 1..]);
         if collected_userinput.chars().nth(0).unwrap() == ' ' {
             //println!("{}", collected_userinput);
-            println!("{}", collected_userinput);
+            //println!("{}", collected_userinput);
             // token.pop();
             token.push(' ');
         }
