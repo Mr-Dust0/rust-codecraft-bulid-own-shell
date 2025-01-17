@@ -197,27 +197,19 @@ fn main() {
                 }
                 let mut command = Command::new(token[0]);
                 let arguments2 = arguments.clone();
-                let mut file_path = String::new();
+                //println!("{:?}", arguments);
+                let mut file_path = handle_stdout_redirect("", &mut arguments);
+                //println!("{:?}", arguments);
 
                 for (index, arg) in arguments.into_iter().enumerate() {
-                    if arg.trim() == ">" || arg.trim() == "1>" {
-                        //println!("File path: {}", arguments2[index + 1]);
-                        file_path = arguments2[index + 1].clone();
-                        break;
-                    }
                     command.arg(arg.trim());
                 }
-                let output = command
-                    .output()
-                    .expect("Failed to execute the command ")
-                    .stdout;
+                let output = command.output().expect("Failed to execute the command ");
 
-                let stdout = String::from_utf8_lossy(&output).to_string();
-                if file_path != String::from("") {
-                    let write_resonse = fs::write(file_path.trim(), &stdout);
-                } else {
-                    print!("{}", stdout);
-                }
+                let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+                let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+                write!(file_path, "{}", stderr);
+                write!(file_path, "{}", stdout);
             } //if paths != "" {
               //    // need to use the & so the loop doesnt consume the tokens so it cant be used
               //    // outside of the loop
@@ -251,6 +243,7 @@ fn handle_stdout_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
     while i < arguments.len() {
         if arguments[i].trim() == ">" || arguments[i].trim() == "1>" || arguments[i].trim() == "2>"
         {
+            //println!("{}", arguments[i]);
             // Ensure there's an argument after the redirection operator
             if i + 1 < arguments.len() {
                 let path = &arguments[i + 1].trim();
