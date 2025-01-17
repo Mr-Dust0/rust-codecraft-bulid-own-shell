@@ -166,7 +166,7 @@ fn main() {
                         match std::fs::read_to_string(path.trim()) {
                             Ok(content) => output = output + content.trim(),
                             Err(_) => {
-                                write!(
+                                writeln!(
                                     file_path_err,
                                     "cat: {}: No such file or directory",
                                     path.trim()
