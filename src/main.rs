@@ -299,7 +299,6 @@ fn handle_stderr_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
     let mut i = 0;
     while i < arguments.len() {
         if arguments[i].trim() == "2>" || arguments[i].trim() == "2>>" {
-            // Ensure there's an argument after the redirection operator
             let path = &arguments[i + 1].trim();
             //            println!("TEST ");
             //           println!("TEST {:?}", file);
