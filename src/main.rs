@@ -132,7 +132,7 @@ fn main() {
                         // If the executable is not an bulitin see if the file is in the env
                         let paths = get_path(&token[1]);
                         if paths == "" {
-                            println!("{}:  not found", token[0]);
+                            println!("{}: not found", token[1]);
                             continue;
                         } else {
                             println!("{} is {}", tokens[1].trim(), paths);
