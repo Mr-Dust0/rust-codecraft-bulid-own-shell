@@ -176,7 +176,7 @@ fn main() {
                 let mut file_path = String::new();
 
                 for (index, arg) in arguments.into_iter().enumerate() {
-                    if arg.trim() == ">" {
+                    if arg.trim() == ">" || arg.trim() == "1>" {
                         //println!("File path: {}", arguments2[index + 1]);
                         file_path = arguments2[index + 1].clone();
                         break;
