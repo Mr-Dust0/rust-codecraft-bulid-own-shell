@@ -298,15 +298,16 @@ fn handle_stderr_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
     // Iterate over the arguments to check for redirection
     let mut i = 0;
     while i < arguments.len() {
-        if arguments[i].trim() == "2>" {
+        if arguments[i].trim() == "2>" || arguments[i].trim() == "2>>" {
             // Ensure there's an argument after the redirection operator
             let path = &arguments[i + 1].trim();
             //            println!("TEST ");
             //           println!("TEST {:?}", file);
             let write = arguments[i].contains(">>");
-
+            //println!("{}", write);
             match std::fs::OpenOptions::new()
                 .create(true)
+                .write(!write)
                 .append(write)
                 .open(path)
             {
