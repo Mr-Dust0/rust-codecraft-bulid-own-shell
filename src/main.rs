@@ -251,6 +251,7 @@ fn handle_stdout_redirect(command: &str, arguments: &mut Vec<String>) -> Box<dyn
                 // Try to open the file for writing
                 if arguments[2].trim() == "2>" {
                     file_path = Box::new(io::stderr());
+                    arguments.truncate(i); // Keep only arguments before the operator
                 } else {
                     match std::fs::OpenOptions::new()
                         .create(true)
