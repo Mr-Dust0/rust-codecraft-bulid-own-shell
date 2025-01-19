@@ -8,6 +8,7 @@ use crossterm::event::{self, Event, KeyCode};
 use crossterm::execute;
 use std::time::Duration;
 fn handle_input()-> String{
+    //getting one character at an time test
     let mut input = Vec::new();
     crossterm::terminal::enable_raw_mode();
      loop {
