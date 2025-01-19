@@ -1,9 +1,52 @@
 use std::env;
 mod quotes;
 mod redirect;
-use std::io::{self, Write};
+use std::io::{self, Write, Read};
 use std::path::Path;
 use std::process::Command;
+use crossterm::event::{self, Event, KeyCode};
+use crossterm::execute;
+use std::time::Duration;
+fn handle_input()-> String{
+    let mut input = Vec::new();
+    crossterm::terminal::enable_raw_mode();
+     loop {
+        // Poll for key events
+        if event::poll(Duration::from_millis(100)).unwrap() {
+            if let Event::Key(key_event) = event::read().unwrap() {
+                match key_event.code {
+                    KeyCode::Char(c) => {
+                        // Print the character typed
+                        print!("{}", c);
+                        io::stdout().flush().unwrap();
+                        input.push(c);
+                    }
+                    KeyCode::Tab => {
+                        // Handle Tab key press
+                        println!("\nTab key pressed!");
+                        print!("{:?}", input);
+                    }
+                    KeyCode::Esc => {
+                        // Escape key to quit the program
+                        println!("\nEscape key pressed, exiting...");
+                        break;
+                    }
+                    KeyCode::Enter => {
+    crossterm::terminal::disable_raw_mode();
+                        println!("");
+                        input.push('\n');
+                        return input.into_iter().collect();
+                    }
+                    _ => {} // Handle other keys if needed
+                }
+            }
+        }
+    }
+
+    crossterm::terminal::disable_raw_mode();
+     return "".to_string();
+}
+
 fn main() {
     // Get the path env so can check the user env when executing commands
     loop {
@@ -11,10 +54,9 @@ fn main() {
         print!("$ ");
         // Flush it so that the dollar is printed to the screen
         io::stdout().flush().unwrap();
-        let stdin = io::stdin();
-        let mut trimmed_input = String::new();
-        // Read userinput into trimmed_input
-        stdin.read_line(&mut trimmed_input).unwrap();
+        let mut stdin_handle = io::stdin();
+        let mut trimmed_input = handle_input();
+        io::stdout().flush().unwrap();
         let input = trimmed_input.clone();
         let mut input2 = trimmed_input.clone();
         let mut test = trimmed_input.clone();
